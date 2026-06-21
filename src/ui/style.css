@@ -1,0 +1,33 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  background: #111;
+  font-family: Arial, sans-serif;
+}
+
+.hud {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.55);
+  color: white;
+  backdrop-filter: blur(8px);
+}
+
+.hud h1 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.hud p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.8;
+}
