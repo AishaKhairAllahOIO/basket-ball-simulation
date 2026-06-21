@@ -17,6 +17,7 @@ import { createNetMesh } from "../rendering/meshes/createNetMesh.js";
 import { createArenaMesh } from "../rendering/meshes/createArenaMesh.js";
 import { createAudienceMesh } from "../rendering/meshes/createAudienceMesh.js";
 import { createLightPolesMesh } from "../rendering/meshes/createLightPolesMesh.js";
+import { createPhysicsPanel } from "../ui/createPhysicsPanel.js";
 
 export function bootstrap() {
   const scene = createScene();
@@ -77,7 +78,10 @@ export function bootstrap() {
     ballMesh.position.copy(simulation.ball.position);
     ballMesh.rotation.set(0, 0, 0);
   }
-
+createPhysicsPanel({
+  simulation,
+  onReset: resetSimulation,
+});
   function handleKeyDown(event) {
     if (event.code === "Space") {
       resetSimulation();
