@@ -1,66 +1,60 @@
 import * as THREE from "three";
 import { basketballDimensions } from "../../shared/constants/dimensions.js";
 
-export function createNetMesh() {
+function createSingleNet(side) {
   const group = new THREE.Group();
 
-  const rimRadius = basketballDimensions.hoop.radius;
+  const hoop = basketballDimensions.hoop;
+  const rimRadius = hoop.radius;
+  const netHeight = 0.425;
 
-  const netHeight = 0.42;
-  const rings = 12;
+  const material = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    roughness: 0.9,
+  });
 
-  for (let i = 0; i < rings; i++) {
-    const radius =
-      rimRadius - (i / rings) * (rimRadius * 0.45);
+  for (let i = 0; i < 8; i++) {
+    const radius = rimRadius - (i / 8) * rimRadius * 0.42;
 
     const ring = new THREE.Mesh(
       new THREE.TorusGeometry(radius, 0.002, 6, 48),
-      new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-        roughness: 0.9,
-      })
+      material
     );
 
     ring.rotation.x = Math.PI / 2;
-    ring.position.y = -(i / rings) * netHeight;
+    ring.position.y = -(i / 8) * netHeight;
 
     group.add(ring);
   }
 
-  const strands = 16;
-
-  for (let i = 0; i < strands; i++) {
-    const angle = (i / strands) * Math.PI * 2;
-
-    const x = Math.cos(angle) * rimRadius;
-    const z = Math.sin(angle) * rimRadius;
+  for (let i = 0; i < 12; i++) {
+    const angle = (i / 12) * Math.PI * 2;
 
     const strand = new THREE.Mesh(
-      new THREE.CylinderGeometry(
-        0.002,
-        0.002,
-        netHeight,
-        4
-      ),
-      new THREE.MeshStandardMaterial({
-        color: 0xffffff,
-      })
+      new THREE.CylinderGeometry(0.002, 0.002, netHeight, 6),
+      material
     );
 
     strand.position.set(
-      x * 0.75,
+      Math.cos(angle) * rimRadius * 0.78,
       -netHeight / 2,
-      z * 0.75
+      Math.sin(angle) * rimRadius * 0.78
     );
 
     group.add(strand);
   }
 
-  group.position.set(
-    basketballDimensions.hoop.position.x,
-    basketballDimensions.hoop.position.y,
-    basketballDimensions.hoop.position.z
-  );
+  group.position.set(side * Math.abs(hoop.position.x), hoop.height, 0);
+
+  return group;
+}
+
+export function createNetMesh() {
+  const group = new THREE.Group();
+  group.name = "TwoNets";
+
+  group.add(createSingleNet(1));
+  group.add(createSingleNet(-1));
 
   return group;
 }

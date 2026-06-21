@@ -4,12 +4,18 @@ export const basketballDimensions = {
     radius: 0.121,
   },
 
+  court: {
+    length: 28,
+    width: 15,
+    thickness: 0.045,
+  },
+
   hoop: {
     radius: 0.225,
     tubeRadius: 0.009,
     height: 3.05,
     position: {
-      x: 2.9,
+      x: 12.425,
       y: 3.05,
       z: 0,
     },
@@ -20,13 +26,17 @@ export const basketballDimensions = {
     height: 1.05,
     depth: 0.05,
     position: {
-      x: 3.05,
+      x: 12.72,
       y: 3.05,
       z: 0,
     },
   },
 
-  court: {
-    size: 12,
+  player: {
+    position: {
+      x: 2.8,
+      y: 0,
+      z: 0,
+    },
   },
 };

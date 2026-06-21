@@ -8,60 +8,93 @@ const shirtColors = [
   0x9b59b6,
   0xffffff,
   0xe67e22,
+  0x1abc9c,
 ];
 
 function createPerson(color) {
   const person = new THREE.Group();
 
   const body = new THREE.Mesh(
-    new THREE.BoxGeometry(0.13, 0.22, 0.11),
+    new THREE.BoxGeometry(0.16, 0.24, 0.12),
     new THREE.MeshStandardMaterial({
       color,
-      roughness: 0.8,
+      roughness: 0.75,
     })
   );
-  body.position.y = 0.16;
+
+  body.position.y = 0.18;
 
   const head = new THREE.Mesh(
-    new THREE.SphereGeometry(0.065, 12, 12),
+    new THREE.SphereGeometry(0.07, 16, 16),
     new THREE.MeshStandardMaterial({
-      color: 0xf3d0a4,
-      roughness: 0.6,
+      color: 0xf1c79b,
+      roughness: 0.7,
     })
   );
-  head.position.y = 0.32;
 
-  person.add(body, head);
+  head.position.y = 0.36;
+
+  person.add(body);
+  person.add(head);
 
   return person;
 }
 
-export function createAudienceMesh() {
+function createStandAudience({
+  side,
+  rows,
+  seatsPerRow,
+}) {
   const group = new THREE.Group();
-  group.name = "Audience";
 
-  const rows = [
-    { z: -3.6, count: 28, y: 0.28 },
-    { z: -4.05, count: 28, y: 0.5 },
-    { z: -4.5, count: 28, y: 0.72 },
-    { z: -4.95, count: 28, y: 0.94 },
-    { z: 3.6, count: 28, y: 0.28 },
-    { z: 4.05, count: 28, y: 0.5 },
-    { z: 4.5, count: 28, y: 0.72 },
-    { z: 4.95, count: 28, y: 0.94 },
-  ];
+  const firstRowZ = side * 10.9;
 
-  for (const row of rows) {
-    for (let i = 0; i < row.count; i++) {
-      const color = shirtColors[(i + row.z * 10) % shirtColors.length | 0];
+  for (let row = 0; row < rows; row++) {
+    for (let seat = 0; seat < seatsPerRow; seat++) {
+      const color =
+        shirtColors[
+          (row * seatsPerRow + seat) %
+            shirtColors.length
+        ];
 
       const person = createPerson(color);
-      person.position.set(-3.6 + i * 0.27, row.y, row.z);
-      person.rotation.y = row.z < 0 ? 0 : Math.PI;
+
+      person.position.set(
+        -10 + seat * 0.42,
+        0.32 + row * 0.28,
+        firstRowZ + side * row * 0.75
+      );
+
+      person.rotation.y =
+        side > 0 ? Math.PI : 0;
 
       group.add(person);
     }
   }
+
+  return group;
+}
+
+export function createAudienceMesh() {
+  const group = new THREE.Group();
+
+  group.name = "FIBA_Audience";
+
+  group.add(
+    createStandAudience({
+      side: -1,
+      rows: 7,
+      seatsPerRow: 48,
+    })
+  );
+
+  group.add(
+    createStandAudience({
+      side: 1,
+      rows: 7,
+      seatsPerRow: 48,
+    })
+  );
 
   return group;
 }

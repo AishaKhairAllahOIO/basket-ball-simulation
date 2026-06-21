@@ -1,46 +1,87 @@
 import * as THREE from "three";
 
-function createPole(x, z) {
+const LIGHT_POLES = [
+  { x: -15.5, z: -10.8, targetX: -7, targetZ: -3 },
+  { x: 15.5, z: -10.8, targetX: 7, targetZ: -3 },
+  { x: -15.5, z: 10.8, targetX: -7, targetZ: 3 },
+  { x: 15.5, z: 10.8, targetX: 7, targetZ: 3 },
+];
+
+function createPole({ x, z, targetX, targetZ }) {
   const group = new THREE.Group();
 
   const pole = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.035, 0.045, 3.8, 16),
+    new THREE.CylinderGeometry(0.045, 0.055, 5.2, 20),
+    new THREE.MeshStandardMaterial({
+      color: 0x111111,
+      roughness: 0.5,
+    })
+  );
+
+  pole.position.y = 2.6;
+  pole.castShadow = true;
+
+  const arm = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.025, 0.025, 1.1, 12),
     new THREE.MeshStandardMaterial({
       color: 0x111111,
       roughness: 0.45,
     })
   );
-  pole.position.y = 1.9;
-  pole.castShadow = true;
+
+  arm.position.set(0, 5.0, -0.35);
+  arm.rotation.x = Math.PI / 2;
+  arm.castShadow = true;
 
   const lamp = new THREE.Mesh(
-    new THREE.BoxGeometry(0.45, 0.22, 0.28),
+    new THREE.BoxGeometry(0.72, 0.22, 0.38),
     new THREE.MeshStandardMaterial({
-      color: 0x111111,
-      roughness: 0.3,
+      color: 0x050505,
+      roughness: 0.35,
     })
   );
-  lamp.position.set(0, 3.85, 0);
 
-  const light = new THREE.SpotLight(0xffffff, 4, 10, Math.PI / 5, 0.45, 1);
-  light.position.set(0, 3.7, 0);
-  light.target.position.set(0, 0, 0);
-  light.castShadow = true;
+  lamp.position.set(0, 5.0, -0.9);
+  lamp.castShadow = true;
 
-  group.add(pole, lamp, light, light.target);
+  const lightFace = new THREE.Mesh(
+    new THREE.BoxGeometry(0.62, 0.03, 0.28),
+    new THREE.MeshStandardMaterial({
+      color: 0xfff4c7,
+      emissive: 0xffe4a3,
+      emissiveIntensity: 1.5,
+    })
+  );
+
+  lightFace.position.set(0, 4.88, -0.9);
+
+  const spot = new THREE.SpotLight(0xffffff, 2.8, 26, Math.PI / 6, 0.45, 1.2);
+  spot.position.set(x, 5.0, z);
+
+  spot.target.position.set(targetX, 0, targetZ);
+  spot.castShadow = true;
+
+  spot.shadow.mapSize.width = 1024;
+  spot.shadow.mapSize.height = 1024;
+
+  group.add(pole, arm, lamp, lightFace);
   group.position.set(x, 0, z);
 
-  return group;
+  group.lookAt(targetX, 0, targetZ);
+
+  const lightGroup = new THREE.Group();
+  lightGroup.add(group, spot, spot.target);
+
+  return lightGroup;
 }
 
 export function createLightPolesMesh() {
   const group = new THREE.Group();
-  group.name = "LightPoles";
+  group.name = "OuterLightPoles";
 
-  group.add(createPole(-4.5, -3.8));
-  group.add(createPole(-4.5, 3.8));
-  group.add(createPole(4.4, -3.8));
-  group.add(createPole(4.4, 3.8));
+  for (const pole of LIGHT_POLES) {
+    group.add(createPole(pole));
+  }
 
   return group;
 }
