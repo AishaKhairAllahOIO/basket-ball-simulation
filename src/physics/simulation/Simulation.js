@@ -5,6 +5,8 @@ import { handleGroundCollision } from "../collisions/courtCollisions.js";
 import { handleBackboardCollision } from "../collisions/backboardCollisions.js";
 import { handleRimCollision } from "../collisions/rimCollisions.js";
 import { detectScore } from "../scoring/scoreDetector.js";
+import { handleNetCollision }
+from "../collisions/netCollisions.js";
 
 export class Simulation {
   constructor() {
@@ -21,6 +23,7 @@ export class Simulation {
     semiImplicitEuler(this.ball, dt);
 
     handleGroundCollision(this.ball);
+    handleNetCollision(this.ball);
     handleBackboardCollision(this.ball);
     handleRimCollision(this.ball);
 
