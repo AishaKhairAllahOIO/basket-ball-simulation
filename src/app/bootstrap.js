@@ -9,6 +9,7 @@ import { createCamera } from "../rendering/scene/createCamera.js";
 import { createRenderer } from "../rendering/scene/createRenderer.js";
 import { createLights } from "../rendering/scene/createLights.js";
 import { createControls } from "../rendering/scene/createControls.js";
+import { createWalkControls } from "../rendering/scene/createWalkControls.js";
 
 import { createBallMesh } from "../rendering/meshes/createBallMesh.js";
 import { createCourtMesh } from "../rendering/meshes/createCourtMesh.js";
@@ -26,7 +27,11 @@ export function bootstrap() {
   const scene = createScene();
   const camera = createCamera();
   const renderer = createRenderer();
+
   const controls = createControls(camera, renderer);
+  const walkControls = createWalkControls(camera, renderer);
+
+  let cameraMode = "orbit";
 
   document.body.appendChild(renderer.domElement);
 
@@ -84,6 +89,40 @@ export function bootstrap() {
     ballMesh.rotation.set(0, 0, 0);
   }
 
+  function enableOrbitMode() {
+    cameraMode = "orbit";
+
+    walkControls.setEnabled(false);
+
+    camera.position.set(-10, 7, 13);
+    camera.lookAt(0, 1.2, 0);
+
+    controls.target.set(0, 1.2, 0);
+    controls.enabled = true;
+    controls.update();
+  }
+
+  function enableWalkMode() {
+    cameraMode = "walk";
+
+    controls.enabled = false;
+
+    camera.position.set(0, 1.72, 6);
+    camera.rotation.set(0, Math.PI, 0);
+
+    walkControls.state.yaw = Math.PI;
+    walkControls.state.pitch = 0;
+    walkControls.setEnabled(true);
+  }
+
+  function toggleCameraMode() {
+    if (cameraMode === "orbit") {
+      enableWalkMode();
+    } else {
+      enableOrbitMode();
+    }
+  }
+
   createPhysicsPanel({
     simulation,
     onReset: resetSimulation,
@@ -92,6 +131,10 @@ export function bootstrap() {
   function handleKeyDown(event) {
     if (event.code === "Space") {
       resetSimulation();
+    }
+
+    if (event.code === "KeyC") {
+      toggleCameraMode();
     }
   }
 
@@ -121,7 +164,12 @@ export function bootstrap() {
     });
 
     syncBallMesh(deltaTime);
-    controls.update();
+
+    if (cameraMode === "orbit") {
+      controls.update();
+    } else {
+      walkControls.update(deltaTime);
+    }
 
     renderer.render(scene, camera);
   }
