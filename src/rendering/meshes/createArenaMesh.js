@@ -12,6 +12,16 @@ const ARENA = {
   sideBleacherWidth: 22,
   endBleacherWidth: 10,
 };
+const textureLoader = new THREE.TextureLoader();
+const grassColor = textureLoader.load("/texture/Grass/color.png");
+
+grassColor.wrapS = THREE.RepeatWrapping;
+grassColor.wrapT = THREE.RepeatWrapping;
+grassColor.repeat.set(80, 80);
+grassColor.colorSpace = THREE.SRGBColorSpace;
+
+const groundGeometry = new THREE.PlaneGeometry(500, 500);
+groundGeometry.rotateX(-Math.PI / 2);
 
 function createMaterial(color) {
   return new THREE.MeshStandardMaterial({
@@ -85,6 +95,17 @@ function createEndBleachers(side) {
 export function createArenaMesh() {
   const group = new THREE.Group();
   group.name = "FIBA_Arena_Bleachers";
+const ground = new THREE.Mesh(
+  groundGeometry,
+  new THREE.MeshStandardMaterial({
+    map: grassColor,        // ← التكستشر بدل color السادة
+    roughness: 0.9,
+    metalness: 0.0,
+  })
+);
+ground.position.y = -0.01;
+ground.receiveShadow = true;
+group.add(ground);
 
   group.add(createSideBleachers(1));
   group.add(createSideBleachers(-1));

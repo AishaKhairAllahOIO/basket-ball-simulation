@@ -490,36 +490,34 @@ function createCourtGlowBorder() {
   const outerLength = COURT.length + COURT.freeZone * 2;
   const outerWidth = COURT.width + COURT.freeZone * 2;
 
-  const glowColor = 0xffff88;
-  const stripWidth = 0.08;
-  const y = 0.03;
+  const glowColor = 0xffff88;        // ← أزرق فاتح متوهج (كان 0xffff88 أصفر)
+  const stripWidth = 0.12;           // ← أعرض شوي (كان 0.08)
+  const y = 0.06;                    // ← ارفعيه فوق الحافة الزرقاء عشان يبان
 
   const glowMaterial = new THREE.MeshBasicMaterial({
     color: glowColor,
     transparent: true,
-    opacity: 0.95,
+    opacity: 1.0,                    // ← أقوى (كان 0.95)
   });
 
   const softGlowMaterial = new THREE.MeshBasicMaterial({
     color: glowColor,
     transparent: true,
-    opacity: 0.28,
+    opacity: 0.45,                   // ← هالة أوضح (كان 0.28)
     depthWrite: false,
   });
 
   function addStrip(width, depth, x, z) {
     const strip = new THREE.Mesh(
-      new THREE.BoxGeometry(width, 0.012, depth),
+      new THREE.BoxGeometry(width, 0.02, depth),
       glowMaterial
     );
-
     strip.position.set(x, y, z);
 
     const glow = new THREE.Mesh(
-      new THREE.BoxGeometry(width + 0.35, 0.006, depth + 0.35),
+      new THREE.BoxGeometry(width + 0.5, 0.01, depth + 0.5),
       softGlowMaterial
     );
-
     glow.position.set(x, y - 0.004, z);
 
     group.add(glow, strip);
@@ -533,9 +531,18 @@ function createCourtGlowBorder() {
   addStrip(stripWidth, outerWidth, -halfL, 0);
   addStrip(stripWidth, outerWidth, halfL, 0);
 
-  const pointLight = new THREE.PointLight(glowColor, 1.8, 24, 2);
-  pointLight.position.set(0, 0.25, 0);
-  group.add(pointLight);
+  // أضواء نقطية موزعة على الحواف عشان التوهج يضيء الأرض
+  const cornerLights = [
+    [halfL, -halfW], [halfL, halfW],
+    [-halfL, -halfW], [-halfL, halfW],
+    [0, -halfW], [0, halfW],
+  ];
+
+  for (const [x, z] of cornerLights) {
+    const pointLight = new THREE.PointLight(glowColor, 2.5, 15, 2);
+    pointLight.position.set(x, 0.5, z);
+    group.add(pointLight);
+  }
 
   return group;
 }
@@ -547,24 +554,11 @@ export function createCourtMesh() {
   const halfLength = COURT.length / 2;
   const halfWidth = COURT.width / 2;
 
-  const outerGroundGeometry = addUv2(new THREE.PlaneGeometry(44, 34));
-
-  const outerGround = new THREE.Mesh(
-    outerGroundGeometry,
-    createTextureMaterial("/texture/Grass", 16, 12, {
-      roughness: 0.95,
-      metalness: 0,
-    })
-  );
-
-  outerGround.rotation.x = -Math.PI / 2;
-  outerGround.position.y = -0.06;
-  outerGround.receiveShadow = true;
-
+  
   const freeZone = new THREE.Mesh(
     new THREE.BoxGeometry(
       COURT.length + COURT.freeZone * 2,
-      0.025,
+      0.05,                              // ← كان 0.025، خليناه أسمك
       COURT.width + COURT.freeZone * 2
     ),
     material(COLORS.freeZone, {
@@ -573,7 +567,7 @@ export function createCourtMesh() {
     })
   );
 
-  freeZone.position.y = -0.035;
+  freeZone.position.y = 0.01;            // ← كان -0.035، رفعناه فوق العشب
   freeZone.receiveShadow = true;
 
   const courtGeometry = addUv2(
@@ -588,10 +582,11 @@ export function createCourtMesh() {
     })
   );
 
-  court.position.y = 0;
+    court.position.y = 0.02;
+
   court.receiveShadow = true;
 
-  group.add(outerGround, freeZone, court);
+  group.add( freeZone, court);
 
   group.add(rectangleLine(-halfLength, halfLength, -halfWidth, halfWidth));
 
@@ -606,7 +601,6 @@ export function createCourtMesh() {
   group.add(createHalfCourt(1));
   group.add(createHalfCourt(-1));
   group.add(createSurroundingFibaZones());
-    group.add(outerGround, freeZone, court);
   group.add(createCourtGlowBorder());
 
   return group;

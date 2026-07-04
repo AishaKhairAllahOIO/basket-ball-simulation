@@ -1,11 +1,14 @@
 import * as THREE from "three";
+import { createSky } from './createSky.js';
 
-export function createScene() {
+export function createScene(renderer) {   // ← تستقبل renderer
   const scene = new THREE.Scene();
 
-  scene.background = new THREE.Color(0x9ed0ff);
+const { sky, sun, sunLight } = createSky(scene);
 
-  scene.fog = new THREE.Fog(0x9ed0ff, 45, 95);
+  // ملاحظة: createSky يعيّن background، فلا نكتب background هنا مرة ثانية
+  // إذا حبيتي تخلين ضباب بلون قريب من السماء:
+scene.fog = new THREE.Fog(0xd8c0b0, 60, 350);
 
   return scene;
 }

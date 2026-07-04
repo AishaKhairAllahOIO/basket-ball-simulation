@@ -24,9 +24,9 @@ import { createPlayerMesh } from "../rendering/meshes/createPlayerMesh.js";
 import { createPhysicsPanel } from "../ui/createPhysicsPanel.js";
 
 export function bootstrap() {
-  const scene = createScene();
-  const camera = createCamera();
   const renderer = createRenderer();
+  const scene = createScene(renderer);
+  const camera = createCamera();
 
   const controls = createControls(camera, renderer);
   const walkControls = createWalkControls(camera, renderer);
