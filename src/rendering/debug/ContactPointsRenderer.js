@@ -32,4 +32,4 @@ export class ContactPointsRenderer {
 
     this.points.length = 0;
   }
-}
+}              
