@@ -3,6 +3,7 @@ import { createSky } from './createSky.js';
 
 export function createScene(renderer) {   // ← تستقبل renderer
   const scene = new THREE.Scene();
+  
 
 const { sky, sun, sunLight } = createSky(scene);
 

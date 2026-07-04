@@ -1,35 +1,47 @@
 import * as THREE from "three";
-import { basketballDimensions } from "../../shared/constants/dimensions.js";
 import { physicsConfig } from "../config/physicsConfig.js";
-import { resolveCollision } from "./collisionResponse.js";
 
-export function handleBackboardCollision(ball) {
-  const board = basketballDimensions.backboard;
+export function detectBackboardCollision(body) {
+  const board = physicsConfig.backboard;
 
-  const boardX = board.position.x - board.depth / 2;
-  const withinY =
-    ball.position.y > board.position.y - board.height / 2 &&
-    ball.position.y < board.position.y + board.height / 2;
+  const normal = new THREE.Vector3(
+    board.normalDirection,
+    0,
+    0
+  ).normalize();
 
-  const withinZ =
-    Math.abs(ball.position.z - board.position.z) < board.width / 2;
+  const signedDistance =
+    (body.position.x - board.x) * board.normalDirection;
 
-  if (
-    withinY &&
-    withinZ &&
-    ball.position.x + ball.radius > boardX &&
-    ball.position.x < board.position.x
-  ) {
-    ball.touchedBackboard = true;
-
-    const penetration = ball.position.x + ball.radius - boardX;
-
-    resolveCollision({
-      body: ball,
-      normal: new THREE.Vector3(-1, 0, 0),
-      restitution: physicsConfig.restitution.backboard,
-      friction: 0.25,
-      correctionDepth: penetration,
-    });
+  if (signedDistance >= body.radius) {
+    return null;
   }
+
+  const withinHeight =
+    body.position.y >= board.y - board.height / 2 - body.radius &&
+    body.position.y <= board.y + board.height / 2 + body.radius;
+
+  const withinWidth =
+    body.position.z >= board.z - board.width / 2 - body.radius &&
+    body.position.z <= board.z + board.width / 2 + body.radius;
+
+  if (!withinHeight || !withinWidth) {
+    return null;
+  }
+
+  return {
+    type: "backboard",
+    normal,
+    penetrationDepth: body.radius - signedDistance,
+    contactPoint: new THREE.Vector3(
+      board.x,
+      body.position.y,
+      body.position.z
+    ),
+    restitution: board.restitution,
+    staticFriction: board.staticFriction,
+    kineticFriction: board.kineticFriction,
+    stiffness: board.stiffness,
+    damping: board.damping,
+  };
 }

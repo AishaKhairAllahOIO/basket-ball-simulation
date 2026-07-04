@@ -1,12 +1,23 @@
+import { physicsConfig } from "../config/physicsConfig.js";
+import { clampVectorLength } from "../math/physicsMath.js";
+
 export function semiImplicitEuler(body, dt) {
-  body.acceleration.copy(body.force).divideScalar(body.mass);
+  body.previousPosition.copy(body.position);
 
-  body.velocity.addScaledVector(body.acceleration, dt);
-  body.position.addScaledVector(body.velocity, dt);
+  body.velocity.add(
+    body.acceleration.clone().multiplyScalar(dt)
+  );
 
-  const angularAcceleration = body.torque
-    .clone()
-    .divideScalar(body.inertia);
+  clampVectorLength(
+    body.velocity,
+    physicsConfig.integrator.maxVelocity
+  );
 
-  body.angularVelocity.addScaledVector(angularAcceleration, dt);
+  body.position.add(
+    body.velocity.clone().multiplyScalar(dt)
+  );
+
+  body.angularVelocity.add(
+    body.angularAcceleration.clone().multiplyScalar(dt)
+  );
 }

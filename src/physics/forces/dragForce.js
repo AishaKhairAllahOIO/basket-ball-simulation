@@ -1,22 +1,18 @@
 import * as THREE from "three";
-import { physicsConfig } from "../config/physicsConfig.js";
+import { EPSILON } from "../math/physicsMath.js";
 
-export function dragForce(body) {
-  const speed = body.velocity.length();
+export function dragForce({ body, rho, Cd, A, wind }) {
+  const windVelocity = new THREE.Vector3(wind.x, wind.y, wind.z);
+  const vRelative = body.velocity.clone().sub(windVelocity);
 
-  if (speed < 0.000001) {
-    return new THREE.Vector3(0, 0, 0);
+  const speed = vRelative.length();
+
+  if (speed < EPSILON) {
+    return new THREE.Vector3();
   }
 
-  const area = Math.PI * body.radius * body.radius;
-
-  const magnitude =
-    0.5 *
-    physicsConfig.airDensity *
-    physicsConfig.dragCoefficient *
-    area *
-    speed *
-    speed;
-
-  return body.velocity.clone().normalize().multiplyScalar(-magnitude);
+  return vRelative
+    .clone()
+    .normalize()
+    .multiplyScalar(-0.5 * rho * Cd * A * speed * speed);
 }

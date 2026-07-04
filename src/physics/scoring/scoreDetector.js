@@ -1,28 +1,45 @@
-import { basketballDimensions } from "../../shared/constants/dimensions.js";
+import { physicsConfig } from "../config/physicsConfig.js";
 
-export function detectScore(ball) {
-  const rim = basketballDimensions.hoop;
+export function updateScoringState(body) {
+  const rim = physicsConfig.hoop;
 
-  const dx = ball.position.x - rim.position.x;
-  const dz = ball.position.z - rim.position.z;
+  const dx = body.position.x - rim.x;
+  const dz = body.position.z - rim.z;
 
   const horizontalDistance = Math.sqrt(dx * dx + dz * dz);
+  const safeRadius = rim.rimRadius - body.radius;
 
-  if (ball.position.y > rim.height + ball.radius) {
-    ball.hasPassedAboveRim = true;
+  if (body.position.y > rim.height + body.radius) {
+    body.hasPassedAboveRim = true;
   }
 
-  const safeRadius = rim.radius - ball.radius;
+  const crossedRimPlaneDownward =
+    body.previousPosition.y >= rim.height &&
+    body.position.y < rim.height &&
+    body.velocity.y < 0;
 
-  const crossedDown =
-    ball.hasPassedAboveRim &&
-    ball.position.y < rim.height &&
-    ball.velocity.y < 0;
+  const centerInsideSafeCircle =
+    horizontalDistance < safeRadius;
 
-  if (crossedDown && horizontalDistance < safeRadius && !ball.hasScored) {
-    ball.hasScored = true;
-    return true;
+  if (
+    body.hasPassedAboveRim &&
+    crossedRimPlaneDownward &&
+    centerInsideSafeCircle
+  ) {
+    body.hasScored = true;
   }
 
-  return false;
+  return {
+    hasScored: body.hasScored,
+    hasPassedAboveRim: body.hasPassedAboveRim,
+    touchedRim: body.touchedRim,
+    touchedBackboard: body.touchedBackboard,
+    type: body.hasScored
+      ? body.touchedRim
+        ? "score-after-rim"
+        : body.touchedBackboard
+          ? "score-after-backboard"
+          : "swish"
+      : "no-score-yet",
+  };
 }
