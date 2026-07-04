@@ -29,6 +29,68 @@ const COLORS = {
   white: 0xffffff,
 };
 
+const textureLoader = new THREE.TextureLoader();
+
+function prepareTexture(texture, repeatX = 1, repeatY = 1, isColor = false) {
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(repeatX, repeatY);
+
+  if (isColor) {
+    texture.colorSpace = THREE.SRGBColorSpace;
+  }
+
+  return texture;
+}
+
+function createTextureMaterial(folderPath, repeatX, repeatY, options = {}) {
+  const colorMap = prepareTexture(
+    textureLoader.load(`${folderPath}/color.png`),
+    repeatX,
+    repeatY,
+    true
+  );
+
+  const aoMap = prepareTexture(
+    textureLoader.load(`${folderPath}/ao.png`),
+    repeatX,
+    repeatY
+  );
+
+  const normalMap = prepareTexture(
+    textureLoader.load(`${folderPath}/normal.png`),
+    repeatX,
+    repeatY
+  );
+
+  const roughnessMap = prepareTexture(
+    textureLoader.load(`${folderPath}/roughness.png`),
+    repeatX,
+    repeatY
+  );
+
+  return new THREE.MeshStandardMaterial({
+    map: colorMap,
+    aoMap,
+    normalMap,
+    roughnessMap,
+    roughness: 0.72,
+    metalness: 0,
+    ...options,
+  });
+}
+
+function addUv2(geometry) {
+  if (geometry.attributes.uv) {
+    geometry.setAttribute(
+      "uv2",
+      new THREE.BufferAttribute(geometry.attributes.uv.array, 2)
+    );
+  }
+
+  return geometry;
+}
+
 function material(color, options = {}) {
   return new THREE.MeshStandardMaterial({
     color,
@@ -154,38 +216,6 @@ function labelPlane({ text, width, depth, x, z, y = 0.09 }) {
   plane.position.set(x, y, z);
 
   return plane;
-}
-
-function woodTexture() {
-  const canvas = document.createElement("canvas");
-  canvas.width = 2048;
-  canvas.height = 1024;
-
-  const ctx = canvas.getContext("2d");
-
-  ctx.fillStyle = "#d8a63a";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  for (let x = 0; x < canvas.width; x += 42) {
-    ctx.fillStyle = x % 84 === 0 ? "#e3b84a" : "#c99731";
-    ctx.fillRect(x, 0, 39, canvas.height);
-
-    ctx.strokeStyle = "rgba(95, 55, 15, 0.22)";
-    ctx.lineWidth = 2;
-
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x + Math.sin(x) * 16, canvas.height);
-    ctx.stroke();
-  }
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(2.3, 1);
-  texture.colorSpace = THREE.SRGBColorSpace;
-
-  return texture;
 }
 
 function createThreePointLine(side) {
@@ -441,8 +471,6 @@ function createSurroundingFibaZones() {
     })
   );
 
-  
-
   group.add(
     rectangleLine(
       -freeOuterLength / 2,
@@ -455,18 +483,80 @@ function createSurroundingFibaZones() {
 
   return group;
 }
-
-export function createCourtMesh() {
+function createCourtGlowBorder() {
   const group = new THREE.Group();
-  group.name = "FIBA_Official_Court_With_Zones";
+  group.name = "Court_Glow_Border";
+
+  const outerLength = COURT.length + COURT.freeZone * 2;
+  const outerWidth = COURT.width + COURT.freeZone * 2;
+
+  const glowColor = 0xffff88;
+  const stripWidth = 0.08;
+  const y = 0.03;
+
+  const glowMaterial = new THREE.MeshBasicMaterial({
+    color: glowColor,
+    transparent: true,
+    opacity: 0.95,
+  });
+
+  const softGlowMaterial = new THREE.MeshBasicMaterial({
+    color: glowColor,
+    transparent: true,
+    opacity: 0.28,
+    depthWrite: false,
+  });
+
+  function addStrip(width, depth, x, z) {
+    const strip = new THREE.Mesh(
+      new THREE.BoxGeometry(width, 0.012, depth),
+      glowMaterial
+    );
+
+    strip.position.set(x, y, z);
+
+    const glow = new THREE.Mesh(
+      new THREE.BoxGeometry(width + 0.35, 0.006, depth + 0.35),
+      softGlowMaterial
+    );
+
+    glow.position.set(x, y - 0.004, z);
+
+    group.add(glow, strip);
+  }
+
+  const halfL = outerLength / 2;
+  const halfW = outerWidth / 2;
+
+  addStrip(outerLength, stripWidth, 0, -halfW);
+  addStrip(outerLength, stripWidth, 0, halfW);
+  addStrip(stripWidth, outerWidth, -halfL, 0);
+  addStrip(stripWidth, outerWidth, halfL, 0);
+
+  const pointLight = new THREE.PointLight(glowColor, 1.8, 24, 2);
+  pointLight.position.set(0, 0.25, 0);
+  group.add(pointLight);
+
+  return group;
+}
+export function createCourtMesh() {
+
+  const group = new THREE.Group();
+  group.name = "FIBA_Official_Court_With_Textures";
 
   const halfLength = COURT.length / 2;
   const halfWidth = COURT.width / 2;
 
+  const outerGroundGeometry = addUv2(new THREE.PlaneGeometry(44, 34));
+
   const outerGround = new THREE.Mesh(
-    new THREE.PlaneGeometry(44, 34),
-    material(COLORS.outerGround)
+    outerGroundGeometry,
+    createTextureMaterial("/texture/Grass", 16, 12, {
+      roughness: 0.95,
+      metalness: 0,
+    })
   );
+
   outerGround.rotation.x = -Math.PI / 2;
   outerGround.position.y = -0.06;
   outerGround.receiveShadow = true;
@@ -477,19 +567,27 @@ export function createCourtMesh() {
       0.025,
       COURT.width + COURT.freeZone * 2
     ),
-    material(COLORS.freeZone)
+    material(COLORS.freeZone, {
+      roughness: 0.7,
+      metalness: 0.01,
+    })
   );
+
   freeZone.position.y = -0.035;
   freeZone.receiveShadow = true;
 
+  const courtGeometry = addUv2(
+    new THREE.BoxGeometry(COURT.length, 0.045, COURT.width)
+  );
+
   const court = new THREE.Mesh(
-    new THREE.BoxGeometry(COURT.length, 0.045, COURT.width),
-    new THREE.MeshStandardMaterial({
-      map: woodTexture(),
-      roughness: 0.46,
-      metalness: 0.03,
+    courtGeometry,
+    createTextureMaterial("/texture/WoodFloor", 5, 3, {
+      roughness: 0.5,
+      metalness: 0.02,
     })
   );
+
   court.position.y = 0;
   court.receiveShadow = true;
 
@@ -508,6 +606,8 @@ export function createCourtMesh() {
   group.add(createHalfCourt(1));
   group.add(createHalfCourt(-1));
   group.add(createSurroundingFibaZones());
+    group.add(outerGround, freeZone, court);
+  group.add(createCourtGlowBorder());
 
   return group;
 }
