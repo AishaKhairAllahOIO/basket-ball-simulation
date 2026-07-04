@@ -1,95 +1,44 @@
-export const physicsConfig = {
-  enabled: {
-    gravity: true,
-    drag: true,
-    magnus: true,
-    buoyancy: true,
-    groundCollision: true,
-    backboardCollision: true,
-    rimCollision: true,
-    netForce: true,
-    penetrationCorrection: true,
-    angularDamping: true,
-  },
+import * as THREE from "three";
 
-  launch: {
-    angleDeg: 44,
-    speed: 8.6,
-    sideOffset: 0,
-    backspin: 6,
-    topspin: 0,
-    sidespin: 0,
-  },
+export const EPSILON = 1e-8;
 
-  ball: {
-    mass: 0.6,
-    radius: 0.121,
-    inertiaFactor: 0.67,
-    internalPressureEffect: 1,
-    surfaceRoughness: 1,
-  },
+export function degToRad(degrees) {
+  return (degrees * Math.PI) / 180;
+}
 
-  environment: {
-    gravity: 9.81,
-    airDensity: 1.2,
-    windX: 0,
-    windY: 0,
-    windZ: 0,
-  },
+export function revolutionsToRadPerSecond(revolutionsPerSecond) {
+  return revolutionsPerSecond * 2 * Math.PI;
+}
 
-  aerodynamics: {
-    dragCoefficient: 0.5,
-    magnusCoefficient: 0.002,
-    angularDamping: 0.002,
-  },
+export function computeCrossSectionArea(R) {
+  return Math.PI * R * R;
+}
 
-  restitution: {
-    ground: 0.8,
-    backboard: 0.65,
-    rim: 0.6,
-    pole: 0.35,
-  },
+export function computeSphereVolume(R) {
+  return (4 / 3) * Math.PI * R ** 3;
+}
 
-  friction: {
-    static: 0.65,
-    kinetic: 0.45,
-    rim: 0.35,
-    backboard: 0.25,
-  },
+export function computeInertia(lambda, m, R) {
+  return lambda * m * R * R;
+}
 
-  contact: {
-    stiffness: 14000,
-    damping: 90,
-    penetrationCorrectionFactor: 0.8,
-  },
+export function clampVectorLength(vector, maxLength) {
+  if (vector.length() > maxLength) {
+    vector.setLength(maxLength);
+  }
 
-  hoop: {
-    rimRadius: 0.225,
-    rimTubeRadius: 0.009,
-    height: 3.05,
-    x: 2.9,
-    z: 0,
-  },
+  return vector;
+}
 
-  backboard: {
-    width: 1.8,
-    height: 1.05,
-    depth: 0.05,
-    x: 3.05,
-    y: 3.05,
-    z: 0,
-  },
+export function projectOnNormal(vector, normal) {
+  const n = normal.clone().normalize();
+  return n.multiplyScalar(vector.dot(n));
+}
 
-  net: {
-    height: 0.425,
-    damping: 0.992,
-    lateralDamping: 0.996,
-    attachmentPoints: 12,
-  },
+export function getTangentialComponent(vector, normal) {
+  return vector.clone().sub(projectOnNormal(vector, normal));
+}
 
-  integrator: {
-    fixedTimestep: 1 / 120,
-    maxSubSteps: 8,
-    maxVelocity: 35,
-  },
-};
+export function zeroVector() {
+  return new THREE.Vector3(0, 0, 0);
+}

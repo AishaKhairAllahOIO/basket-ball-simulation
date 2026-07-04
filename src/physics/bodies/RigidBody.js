@@ -1,20 +1,48 @@
 import * as THREE from "three";
+import { computeInertia } from "../math/physicsMath.js";
 
 export class RigidBody {
-  constructor({ mass, radius, position, velocity, angularVelocity }) {
+  constructor({
+    mass,
+    radius,
+    inertiaFactor,
+    position,
+    velocity,
+    angularVelocity,
+  }) {
     this.mass = mass;
     this.radius = radius;
+    this.inertiaFactor = inertiaFactor;
 
     this.position = position.clone();
+    this.previousPosition = position.clone();
+
     this.velocity = velocity.clone();
     this.acceleration = new THREE.Vector3();
 
     this.angularVelocity = angularVelocity.clone();
-
-    this.inertia = (2 / 3) * mass * radius * radius;
+    this.angularAcceleration = new THREE.Vector3();
 
     this.force = new THREE.Vector3();
     this.torque = new THREE.Vector3();
+
+    this.inertia = computeInertia(
+      this.inertiaFactor,
+      this.mass,
+      this.radius
+    );
+  }
+
+  updateMassProperties({ mass, radius, inertiaFactor }) {
+    this.mass = mass;
+    this.radius = radius;
+    this.inertiaFactor = inertiaFactor;
+
+    this.inertia = computeInertia(
+      this.inertiaFactor,
+      this.mass,
+      this.radius
+    );
   }
 
   clearForces() {
@@ -22,11 +50,11 @@ export class RigidBody {
     this.torque.set(0, 0, 0);
   }
 
-  addForce(force) {
-    this.force.add(force);
+  addForce(F) {
+    this.force.add(F);
   }
 
-  addTorque(torque) {
-    this.torque.add(torque);
+  addTorque(tau) {
+    this.torque.add(tau);
   }
 }

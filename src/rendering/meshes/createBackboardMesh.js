@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { basketballDimensions } from "../../shared/constants/dimensions.js";
+import { basketballDimensions } from "../../physics/constants/studyConstants.js";
 
 function createSingleBackboard(side) {
   const b = basketballDimensions.backboard;

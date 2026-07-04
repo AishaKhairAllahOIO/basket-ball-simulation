@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-import { Simulation } from "../physics/simulation/Simulation.js";
+import { Simulation } from "../physics/simulation/PhysicsWorld.js";
 import { FixedTimestep } from "../physics/integrators/fixedTimestep.js";
 import { physicsConfig } from "../physics/config/physicsConfig.js";
 

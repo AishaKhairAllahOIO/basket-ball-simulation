@@ -1,48 +1,48 @@
 import * as THREE from "three";
 
 import { RigidBody } from "./RigidBody.js";
-import { basketballDimensions } from "../../shared/constants/dimensions.js";
 import { physicsConfig } from "../config/physicsConfig.js";
+import {
+  degToRad,
+  revolutionsToRadPerSecond,
+} from "../math/physicsMath.js";
 
 export class Basketball extends RigidBody {
   constructor() {
     super({
-      mass: physicsConfig.ball.mass ?? basketballDimensions.ball.mass,
-      radius: physicsConfig.ball.radius ?? basketballDimensions.ball.radius,
-position: new THREE.Vector3(2.8, 1.75, 0),
-      velocity: new THREE.Vector3(8.6, 6.4, 0),
-      angularVelocity: new THREE.Vector3(0, 0, -35),
+      mass: physicsConfig.ball.mass,
+      radius: physicsConfig.ball.radius,
+      inertiaFactor: physicsConfig.ball.inertiaFactor,
+      position: new THREE.Vector3(2.8, 1.75, physicsConfig.launch.sideOffset),
+      velocity: new THREE.Vector3(0, 0, 0),
+      angularVelocity: new THREE.Vector3(0, 0, 0),
     });
 
-    this.hasScored = false;
-    this.hasPassedAboveRim = false;
-    this.touchedRim = false;
-    this.touchedBackboard = false;
+    this.reset();
   }
 
   reset() {
-    const angle = (physicsConfig.launch.angleDeg * Math.PI) / 180;
+    const theta = degToRad(physicsConfig.launch.angleDeg);
     const speed = physicsConfig.launch.speed;
 
-    this.mass = physicsConfig.ball.mass;
-    this.radius = physicsConfig.ball.radius;
+    this.updateMassProperties({
+      mass: physicsConfig.ball.mass,
+      radius: physicsConfig.ball.radius,
+      inertiaFactor: physicsConfig.ball.inertiaFactor,
+    });
 
-    this.inertia =
-      physicsConfig.ball.inertiaFactor *
-      this.mass *
-      this.radius *
-      this.radius;
+    this.position.set(2.8, 1.75, physicsConfig.launch.sideOffset);
+    this.previousPosition.copy(this.position);
 
-this.position.set(2.8, 1.75, physicsConfig.launch.sideOffset);
     this.velocity.set(
-      Math.cos(angle) * speed,
-      Math.sin(angle) * speed,
-      0
+      Math.cos(theta) * speed,
+      Math.sin(theta) * speed,
+      physicsConfig.launch.sideVelocity
     );
 
-    const backspin = physicsConfig.launch.backspin * Math.PI * 2;
-    const topspin = physicsConfig.launch.topspin * Math.PI * 2;
-    const sidespin = physicsConfig.launch.sidespin * Math.PI * 2;
+    const backspin = revolutionsToRadPerSecond(physicsConfig.launch.backspin);
+    const topspin = revolutionsToRadPerSecond(physicsConfig.launch.topspin);
+    const sidespin = revolutionsToRadPerSecond(physicsConfig.launch.sidespin);
 
     this.angularVelocity.set(
       0,
@@ -50,13 +50,14 @@ this.position.set(2.8, 1.75, physicsConfig.launch.sideOffset);
       topspin - backspin
     );
 
-    this.force.set(0, 0, 0);
-    this.torque.set(0, 0, 0);
     this.acceleration.set(0, 0, 0);
+    this.angularAcceleration.set(0, 0, 0);
+    this.clearForces();
 
     this.hasScored = false;
     this.hasPassedAboveRim = false;
     this.touchedRim = false;
     this.touchedBackboard = false;
+    this.touchedGround = false;
   }
 }

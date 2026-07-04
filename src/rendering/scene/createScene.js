@@ -1,7 +1,10 @@
 import * as THREE from "three";
 
+import { createEnvironment } from "./createEnvironment";
+
 export function createScene() {
   const scene = new THREE.Scene();
+  
 
   scene.background = new THREE.Color(0x9ed0ff);
 
