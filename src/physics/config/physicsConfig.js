@@ -1,44 +1,55 @@
-import * as THREE from "three";
+export const PhysicsConfig = Object.freeze({
 
-export const EPSILON = 1e-8;
+  enabled: {
 
-export function degToRad(degrees) {
-  return (degrees * Math.PI) / 180;
-}
+    gravity: true,
 
-export function revolutionsToRadPerSecond(revolutionsPerSecond) {
-  return revolutionsPerSecond * 2 * Math.PI;
-}
+    drag: true,
 
-export function computeCrossSectionArea(R) {
-  return Math.PI * R * R;
-}
+    magnus: true,
 
-export function computeSphereVolume(R) {
-  return (4 / 3) * Math.PI * R ** 3;
-}
+    buoyancy: true,
 
-export function computeInertia(lambda, m, R) {
-  return lambda * m * R * R;
-}
+    normalForce: true,
 
-export function clampVectorLength(vector, maxLength) {
-  if (vector.length() > maxLength) {
-    vector.setLength(maxLength);
-  }
+    staticFriction: true,
 
-  return vector;
-}
+    kineticFriction: true,
 
-export function projectOnNormal(vector, normal) {
-  const n = normal.clone().normalize();
-  return n.multiplyScalar(vector.dot(n));
-}
+    rollingResistance: true,
 
-export function getTangentialComponent(vector, normal) {
-  return vector.clone().sub(projectOnNormal(vector, normal));
-}
+    angularDamping: true,
 
-export function zeroVector() {
-  return new THREE.Vector3(0, 0, 0);
-}
+    netResistance: true,
+
+    contact: true,
+
+    restitution: true,
+
+    penetrationCorrection: true,
+
+    continuousCollisionDetection: false,
+
+    diagnostics: false,
+
+  },
+
+  integrator: {
+
+    type: "SemiImplicitEuler",
+
+    fixedTimestep: 1 / 120,
+
+    maxSubSteps: 8,
+
+  },
+
+  limits: {
+
+    maxVelocity: 35,
+
+    maxAngularVelocity: 120,
+
+  },
+
+});

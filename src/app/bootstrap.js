@@ -1,8 +1,11 @@
+
 import * as THREE from "three";
 
-import { Simulation } from "../physics/simulation/PhysicsWorld.js";
-import { FixedTimestep } from "../physics/integrators/fixedTimestep.js";
-import { physicsConfig } from "../physics/config/physicsConfig.js";
+import { Basketball } from "../physics/bodies/Basketball.js";
+import { PhysicsWorld } from "../physics/simulation/PhysicsWorld.js";
+import { PhysicsConfig } from "../physics/config/PhysicsConfig.js";
+import { FixedTimestep } from "../physics/integrators/FixedTimestep.js";
+
 
 import { createScene } from "../rendering/scene/createScene.js";
 import { createCamera } from "../rendering/scene/createCamera.js";
@@ -37,11 +40,12 @@ export function bootstrap() {
 
   createLights(scene);
 
-  const simulation = new Simulation();
+  const ball = new Basketball();
+  const physicsWorld = new PhysicsWorld(ball);
 
   const fixedTimestep = new FixedTimestep({
-    timestep: physicsConfig.integrator.fixedTimestep,
-    maxSubSteps: physicsConfig.integrator.maxSubSteps,
+    timestep: PhysicsConfig.integrator.fixedTimestep,
+    maxSubSteps: PhysicsConfig.integrator.maxSubSteps,
   });
 
   const courtMesh = createCourtMesh();
@@ -70,22 +74,46 @@ export function bootstrap() {
   const clock = new THREE.Clock();
 
   function syncBallMesh(deltaTime) {
-    ballMesh.position.copy(simulation.ball.position);
+    ballMesh.position.copy(ball.position);
 
-    const angularVelocity = simulation.ball.angularVelocity;
-
-    if (angularVelocity.lengthSq() > 0.000001) {
-      const spinAxis = angularVelocity.clone().normalize();
-      const spinAngle = angularVelocity.length() * deltaTime;
+    if (ball.omega.lengthSq() > 0.000001) {
+      const spinAxis = ball.omega.clone().normalize();
+      const spinAngle = ball.omega.length() * deltaTime;
 
       ballMesh.rotateOnAxis(spinAxis, spinAngle);
     }
   }
 
-  function resetSimulation() {
-    simulation.reset();
+  function resetBall() {
+    const freshBall = new Basketball();
 
-    ballMesh.position.copy(simulation.ball.position);
+    ball.m = freshBall.m;
+    ball.R = freshBall.R;
+    ball.I = freshBall.I;
+
+    ball.position.copy(freshBall.position);
+    ball.previousPosition.copy(freshBall.previousPosition);
+
+    ball.v.copy(freshBall.v);
+    ball.a.copy(freshBall.a);
+
+    ball.omega.copy(freshBall.omega);
+    ball.alpha.copy(freshBall.alpha);
+
+    ball.F.set(0, 0, 0);
+    ball.tau.set(0, 0, 0);
+
+    ball.hasScored = false;
+    ball.hasPassedAboveRim = false;
+    ball.touchedGround = false;
+    ball.touchedRim = false;
+    ball.touchedBackboard = false;
+  }
+
+  function resetSimulation() {
+    resetBall();
+
+    ballMesh.position.copy(ball.position);
     ballMesh.rotation.set(0, 0, 0);
   }
 
@@ -124,7 +152,8 @@ export function bootstrap() {
   }
 
   createPhysicsPanel({
-    simulation,
+    ball,
+    physicsWorld,
     onReset: resetSimulation,
   });
 
@@ -149,6 +178,7 @@ export function bootstrap() {
   window.addEventListener("keydown", handleKeyDown);
   window.addEventListener("resize", handleResize);
 
+  enableOrbitMode();
   resetSimulation();
 
   function animate() {
@@ -156,11 +186,11 @@ export function bootstrap() {
 
     const deltaTime = clock.getDelta();
 
-    fixedTimestep.timestep = physicsConfig.integrator.fixedTimestep;
-    fixedTimestep.maxSubSteps = physicsConfig.integrator.maxSubSteps;
+    fixedTimestep.timestep = PhysicsConfig.integrator.fixedTimestep;
+    fixedTimestep.maxSubSteps = PhysicsConfig.integrator.maxSubSteps;
 
     fixedTimestep.update(deltaTime, (dt) => {
-      simulation.step(dt);
+      physicsWorld.step(dt);
     });
 
     syncBallMesh(deltaTime);

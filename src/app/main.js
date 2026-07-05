@@ -1,4 +1,3 @@
-import "../ui/style.css";
-import { bootstrap } from "./bootstrap.js";
+import { runPhysicsTest } from "../game/PhysicsConsoleTest.js";
 
-bootstrap();
+runPhysicsTest();

@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import { basketballDimensions } from "../../physics/constants/studyConstants.js";
+// import { basketballDimensions } from "../../physics/constants/studyConstants.js";
 
 function createSingleBackboard(side) {
-  const b = basketballDimensions.backboard;
+  // const b = basketballDimensions.backboard;
   const group = new THREE.Group();
 
   const x = side * Math.abs(b.position.x);

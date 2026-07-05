@@ -1,4 +1,4 @@
-import { physicsConfig } from "../physics/config/physicsConfig.js";
+import { PhysicsConfig } from "../physics/config/physicsConfig.js";
 
 function formatValue(value, decimals = 3) {
   if (typeof value === "boolean") return value ? "تشغيل" : "إيقاف";
