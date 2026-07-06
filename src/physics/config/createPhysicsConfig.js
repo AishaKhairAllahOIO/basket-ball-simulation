@@ -7,62 +7,39 @@ import { EnvironmentProperties } from "../properties/EnvironmentProperties.js";
 import { BasketballGeometry } from "../derived/BasketballGeometry.js";
 import { BasketballInertia } from "../derived/BasketballInertia.js";
 
+function deepMerge(base, override = {}) {
+  const result = { ...base };
+
+  for (const key in override) {
+    if (
+      override[key] &&
+      typeof override[key] === "object" &&
+      !Array.isArray(override[key])
+    ) {
+      result[key] = deepMerge(base[key] ?? {}, override[key]);
+    } else {
+      result[key] = override[key];
+    }
+  }
+
+  return result;
+}
+
 export function createPhysicsConfig(overrides = {}) {
-
-  return {
-
-    enabled: {
-
-      ...PhysicsConfig.enabled,
-
-      ...(overrides.enabled ?? {}),
-
-    },
-
-    integrator: {
-
-      ...PhysicsConfig.integrator,
-
-      ...(overrides.integrator ?? {}),
-
-    },
-
-    limits: {
-
-      ...PhysicsConfig.limits,
-
-      ...(overrides.limits ?? {}),
-
-    },
+  const baseConfig = {
+    enabled: PhysicsConfig.enabled,
+    integrator: PhysicsConfig.integrator,
+    limits: PhysicsConfig.limits,
 
     ball: {
-
       ...BasketballProperties,
-
       geometry: BasketballGeometry,
-
       inertia: BasketballInertia,
-
-      ...(overrides.ball ?? {}),
-
     },
 
-    court: {
-
-      ...CourtProperties,
-
-      ...(overrides.court ?? {}),
-
-    },
-
-    environment: {
-
-      ...EnvironmentProperties,
-
-      ...(overrides.environment ?? {}),
-
-    },
-
+    court: CourtProperties,
+    environment: EnvironmentProperties,
   };
 
+  return deepMerge(baseConfig, overrides);
 }

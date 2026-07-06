@@ -1,3 +1,3 @@
-import { exposePhysicsLab } from "../game/PhysicsConsoleLab";
+import { exposePhysicsLab } from "../game/PhysicsConsoleLab.js";
 
 exposePhysicsLab();
