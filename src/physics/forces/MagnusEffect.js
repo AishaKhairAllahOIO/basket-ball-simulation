@@ -7,13 +7,38 @@ export function MagnusEffect(body, config) {
     return new THREE.Vector3();
   }
 
-  const S = config.ball.aerodynamics.magnusCoefficient;
-
   const omegaCrossVelocity = body.omega.clone().cross(body.v);
 
   if (omegaCrossVelocity.lengthSq() < EPSILON) {
     return new THREE.Vector3();
   }
 
-  return omegaCrossVelocity.multiplyScalar(S);
+  /*
+    =====================================================
+    OPTION 1 — Full aerodynamic Magnus model
+    FM = 0.5 * rho * Cl * A * |v|^2 * n
+    n  = (omega × v) / |omega × v|
+    =====================================================
+  */
+
+  const rho = config.environment.air.rho;
+  const Cl = config.ball.aerodynamics.Cl;
+  const A = config.ball.geometry.A;
+  const speed = body.v.length();
+
+  const direction = omegaCrossVelocity.clone().normalize();
+
+  return direction.multiplyScalar(
+    0.5 * rho * Cl * A * speed * speed
+  );
+
+  /*
+    =====================================================
+    OPTION 2 — Simplified Magnus model
+    FM = S * (omega × v)
+    =====================================================
+  */
+
+  // const S = config.ball.aerodynamics.magnusCoefficient;
+  // return omegaCrossVelocity.multiplyScalar(S);
 }

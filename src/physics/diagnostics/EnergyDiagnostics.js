@@ -1,7 +1,7 @@
 import { Energy } from "../dynamics/Energy.js";
 
-export function EnergyDiagnostics(body) {
-  const energy = Energy(body);
+export function EnergyDiagnostics(body, config) {
+  const energy = Energy(body, config);
 
   return {
     translational: energy.Kt,

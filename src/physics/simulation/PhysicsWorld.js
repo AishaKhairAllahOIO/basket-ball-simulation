@@ -13,6 +13,9 @@ import { ImpulseSolver } from "../response/ImpulseSolver.js";
 import { IntegratorFactory } from "../integrators/IntegratorFactory.js";
 
 import { ScoreDetector } from "../rules/ScoreDetector.js";
+import { ContinuousCollisionDetection } from "../contact/ContinuousCollisionDetection.js";
+import { Energy } from "../dynamics/Energy.js";
+import { EnergyAnalysis } from "../diagnostics/EnergyAnalysis.js";
 
 export class PhysicsWorld {
   constructor(body, configOverrides = {}) {
@@ -21,6 +24,8 @@ export class PhysicsWorld {
 
     this.accumulator = 0;
     this.integrator = IntegratorFactory(this.config.integrator.type);
+    this.previousEnergy = Energy(this.body, this.config);
+this.lastEnergyAnalysis = null;
   }
 
   step(frameDt) {
@@ -51,9 +56,23 @@ export class PhysicsWorld {
 
       this.integrator.step(this.body, dt);
 
+      const ccdContacts = ContinuousCollisionDetection(this.body, this.config);
+
+if (ccdContacts.length > 0) {
+  ImpulseSolver(this.body, ccdContacts, this.config);
+  PenetrationCorrection(this.body, ccdContacts, this.config);
+}
+
       PenetrationCorrection(this.body, contacts, this.config);
 
       result = ScoreDetector(this.body, this.config);
+      this.lastEnergyAnalysis = EnergyAnalysis(
+  this.previousEnergy,
+  this.body,
+  this.config
+);
+
+this.previousEnergy = this.lastEnergyAnalysis.current;
 
       this.accumulator -= dt;
       steps += 1;

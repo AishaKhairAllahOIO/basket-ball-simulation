@@ -1,7 +1,8 @@
 import { EnergyDiagnostics } from "./EnergyDiagnostics.js";
 import { ForceDiagnostics } from "./ForceDiagnostics.js";
+import { MomentumDiagnostics } from "./MomentumDiagnostics.js";
 
-export function SimulationDiagnostics(body) {
+export function SimulationDiagnostics(body, config, world = null) {
   return {
     position: {
       x: body.position.x,
@@ -23,7 +24,11 @@ export function SimulationDiagnostics(body) {
       magnitude: body.omega.length(),
     },
 
-    energy: EnergyDiagnostics(body),
+    energy: EnergyDiagnostics(body, config),
+    energyAnalysis: world?.lastEnergyAnalysis ?? null,
+
+
+    momentum: MomentumDiagnostics(body),
 
     forces: ForceDiagnostics(body),
 

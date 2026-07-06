@@ -1,3 +1,3 @@
-import { runPhysicsTest } from "../game/PhysicsConsoleTest.js";
+import { exposePhysicsLab } from "../game/PhysicsConsoleLab";
 
-runPhysicsTest();
+exposePhysicsLab();

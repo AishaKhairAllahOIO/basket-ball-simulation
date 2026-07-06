@@ -28,7 +28,7 @@ export const PhysicsConfig = Object.freeze({
 
     penetrationCorrection: true,
 
-    continuousCollisionDetection: false,
+    continuousCollisionDetection: true,
 
     diagnostics: false,
 

@@ -1,7 +1,9 @@
 import * as THREE from "three";
 
-export function Gravity(body, config) {
-  if (!config.enabled.gravity) {
+export function Gravity(body, config) 
+{
+  if (!config.enabled.gravity) 
+  {
     return new THREE.Vector3();
   }
 

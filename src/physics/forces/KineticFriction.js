@@ -2,14 +2,16 @@ import * as THREE from "three";
 
 const EPSILON = 1e-8;
 
-export function getContactPointVelocity(body, contactPoint) {
+export function getContactPointVelocity(body, contactPoint) 
+{
   const r = contactPoint.clone().sub(body.position);
 
   return body.v.clone().add(body.omega.clone().cross(r));
 }
 
 export function KineticFriction(body, contact, normalForceMagnitude) {
-  if (!contact || normalForceMagnitude <= 0) {
+  if (!contact || normalForceMagnitude <= 0) 
+  {
     return {
       Ff: new THREE.Vector3(),
       tau: new THREE.Vector3(),

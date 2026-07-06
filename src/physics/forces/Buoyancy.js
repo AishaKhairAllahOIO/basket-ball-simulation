@@ -7,7 +7,7 @@ export function Buoyancy(body, config) {
 
   return new THREE.Vector3(
     0,
-    config.environment.air.rho * config.ball.derived.V * config.environment.g,
+    config.environment.air.rho * config.ball.geometry.V * config.environment.g,
     0
   );
 }

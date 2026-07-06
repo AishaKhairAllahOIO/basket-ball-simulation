@@ -8,6 +8,8 @@ export function NormalForce(body, contact) {
   const n = contact.normal.clone().normalize();
   const vn = body.v.dot(n);
 
+  contact.normalVelocity = vn;
+
   const magnitude = Math.max(
     0,
     contact.stiffness * contact.penetrationDepth - contact.damping * vn

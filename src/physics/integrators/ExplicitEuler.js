@@ -1,4 +1,5 @@
-export class ExplicitEuler {
+export class ExplicitEuler 
+{
   step(body, dt) {
     body.previousPosition.copy(body.position);
 

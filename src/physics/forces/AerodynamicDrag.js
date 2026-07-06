@@ -2,8 +2,10 @@ import * as THREE from "three";
 
 const EPSILON = 1e-8;
 
-export function AerodynamicDrag(body, config) {
-  if (!config.enabled.drag) {
+export function AerodynamicDrag(body, config) 
+{
+  if (!config.enabled.drag) 
+  {
     return new THREE.Vector3();
   }
 
@@ -16,13 +18,14 @@ export function AerodynamicDrag(body, config) {
   const vRelative = body.v.clone().sub(wind);
   const speed = vRelative.length();
 
-  if (speed < EPSILON) {
+  if (speed < EPSILON) 
+  {
     return new THREE.Vector3();
   }
 
   const rho = config.environment.air.rho;
   const Cd = config.ball.aerodynamics.Cd;
-  const A = config.ball.derived.A;
+  const A = config.ball.geometry.A;
 
   return vRelative
     .clone()
