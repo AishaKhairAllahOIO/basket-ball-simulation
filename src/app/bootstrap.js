@@ -66,7 +66,7 @@ export function bootstrap()
   simulation.attachInput();
   runPhysicsTest();
 
-  exposePhysicsLab();
+  exposePhysicsLab(simulation);
 
   window.simulation = simulation;
 

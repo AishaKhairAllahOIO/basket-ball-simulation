@@ -6,13 +6,29 @@ import { CourtGeometry } from "../physics/properties/CourtGeometry.js";
 
 const WORLD_UP = new THREE.Vector3(0, 1, 0);
 
-function revToRadPerSecond(rev) 
-{
+function revToRadPerSecond(rev) {
   return rev * 2 * Math.PI;
 }
 
-function configureBody(body, { position, velocity, omega }) 
-{
+function deepMerge(base, override = {}) {
+  const result = { ...base };
+
+  for (const key in override) {
+    if (
+      override[key] &&
+      typeof override[key] === "object" &&
+      !Array.isArray(override[key])
+    ) {
+      result[key] = deepMerge(base[key] ?? {}, override[key]);
+    } else {
+      result[key] = override[key];
+    }
+  }
+
+  return result;
+}
+
+function configureBody(body, { position, velocity, omega }) {
   body.position.copy(position);
   body.previousPosition.copy(position);
 
@@ -32,14 +48,17 @@ function configureBody(body, { position, velocity, omega })
   body.touchedBackboard = false;
 }
 
-function velocityFromAngle(speed, angleDeg) 
-{
+function velocityFromAngle(speed, angleDeg) {
   const theta = (angleDeg * Math.PI) / 180;
-  return new THREE.Vector3(Math.cos(theta) * speed, Math.sin(theta) * speed, 0);
+
+  return new THREE.Vector3(
+    Math.cos(theta) * speed,
+    Math.sin(theta) * speed,
+    0
+  );
 }
 
-function backspinFor(direction, spinRev) 
-{
+function backspinFor(direction, spinRev) {
   return new THREE.Vector3()
     .crossVectors(WORLD_UP, direction)
     .normalize()
@@ -47,16 +66,15 @@ function backspinFor(direction, spinRev)
 }
 
 export function createSimulationBridge({
-  ballMesh, 
+  ballMesh,
   scene = null,
-  trajectory = null, 
+  trajectory = null,
   contactPoints = null,
-  physicsDebugger = null, 
-  walk = null, 
+  physicsDebugger = null,
+  walk = null,
   onScore = null,
 
-  defaultShot = 
-  {
+  defaultShot = {
     position: new THREE.Vector3(
       CourtGeometry.player.position.x,
       1.75,
@@ -67,18 +85,25 @@ export function createSimulationBridge({
     spinRev: 6,
   },
 
-  cameraShot = { speed: 10.5, spinRev: 6 },
-} = {}) 
-{
-  const courtOverrides = {};
+  cameraShot = {
+    speed: 10.5,
+    spinRev: 6,
+  },
+} = {}) {
+  let liveOverrides = {};
 
   const body = new Basketball();
-  let world = new PhysicsWorld(body, courtOverrides);
+  let world = new PhysicsWorld(body, liveOverrides);
 
   const trajectoryPoints = [];
   const MAX_POINTS = 400;
 
-  let lastTouched = { ground: false, rim: false, backboard: false };
+  let lastTouched = {
+    ground: false,
+    rim: false,
+    backboard: false,
+  };
+
   let scoredAnnounced = false;
 
   const tmpQuat = new THREE.Quaternion();
@@ -86,19 +111,35 @@ export function createSimulationBridge({
 
   function resetTracking() {
     trajectoryPoints.length = 0;
-    lastTouched = { ground: false, rim: false, backboard: false };
+
+    lastTouched = {
+      ground: false,
+      rim: false,
+      backboard: false,
+    };
+
     scoredAnnounced = false;
+
     trajectory?.clear();
     contactPoints?.clear();
+  }
+
+  function rebuildWorld() {
+    world = new PhysicsWorld(body, liveOverrides);
   }
 
   function reset() {
     configureBody(body, {
       position: defaultShot.position.clone(),
       velocity: velocityFromAngle(defaultShot.speed, defaultShot.angleDeg),
-      omega: new THREE.Vector3(0, 0, -revToRadPerSecond(defaultShot.spinRev)),
+      omega: new THREE.Vector3(
+        0,
+        0,
+        -revToRadPerSecond(defaultShot.spinRev)
+      ),
     });
-    world = new PhysicsWorld(body, courtOverrides);
+
+    rebuildWorld();
     resetTracking();
   }
 
@@ -108,13 +149,16 @@ export function createSimulationBridge({
       velocity: velocity.clone(),
       omega: omega ? omega.clone() : new THREE.Vector3(),
     });
-    world = new PhysicsWorld(body, courtOverrides);
+
+    rebuildWorld();
     resetTracking();
   }
 
   function shootFromCamera(overrides = {}) {
     if (!walk) return false;
+
     const { origin, direction } = walk.getShotRay();
+
     const speed = overrides.speed ?? cameraShot.speed;
     const spinRev = overrides.spinRev ?? cameraShot.spinRev;
 
@@ -123,18 +167,20 @@ export function createSimulationBridge({
       velocity: direction.clone().multiplyScalar(speed),
       omega: backspinFor(direction, spinRev),
     });
+
     return true;
   }
-  
 
   function predictPath({ position, velocity, omega }, duration = 2, dt = 1 / 60) {
     const ghost = new Basketball();
+
     configureBody(ghost, {
       position: position.clone(),
       velocity: velocity.clone(),
       omega: omega ? omega.clone() : new THREE.Vector3(),
     });
-    const ghostWorld = new PhysicsWorld(ghost, courtOverrides);
+
+    const ghostWorld = new PhysicsWorld(ghost, liveOverrides);
 
     const points = [ghost.position.clone()];
     const steps = Math.floor(duration / dt);
@@ -142,8 +188,12 @@ export function createSimulationBridge({
     for (let i = 0; i < steps; i++) {
       ghostWorld.step(dt);
       points.push(ghost.position.clone());
-      if (ghost.position.y - ghost.R <= 0 && ghost.v.y <= 0) break;
+
+      if (ghost.position.y - ghost.R <= 0 && ghost.v.y <= 0) {
+        break;
+      }
     }
+
     return points;
   }
 
@@ -151,6 +201,7 @@ export function createSimulationBridge({
     ballMesh.position.copy(body.position);
 
     const angle = body.omega.length() * dt;
+
     if (angle > 1e-6) {
       tmpAxis.copy(body.omega).normalize();
       tmpQuat.setFromAxisAngle(tmpAxis, angle);
@@ -160,16 +211,31 @@ export function createSimulationBridge({
 
   function updateTrajectory() {
     if (!trajectory) return;
+
     trajectoryPoints.push(body.position.clone());
-    if (trajectoryPoints.length > MAX_POINTS) trajectoryPoints.shift();
+
+    if (trajectoryPoints.length > MAX_POINTS) {
+      trajectoryPoints.shift();
+    }
+
     trajectory.render(trajectoryPoints);
   }
 
   function updateContactMarkers() {
     if (!contactPoints) return;
-    if (body.touchedGround && !lastTouched.ground) contactPoints.add(body.position);
-    if (body.touchedRim && !lastTouched.rim) contactPoints.add(body.position);
-    if (body.touchedBackboard && !lastTouched.backboard) contactPoints.add(body.position);
+
+    if (body.touchedGround && !lastTouched.ground) {
+      contactPoints.add(body.position);
+    }
+
+    if (body.touchedRim && !lastTouched.rim) {
+      contactPoints.add(body.position);
+    }
+
+    if (body.touchedBackboard && !lastTouched.backboard) {
+      contactPoints.add(body.position);
+    }
+
     lastTouched = {
       ground: body.touchedGround,
       rim: body.touchedRim,
@@ -198,16 +264,57 @@ export function createSimulationBridge({
     return result;
   }
 
-  function attachInput() 
-  {
+  function attachInput() {
     function onKeyDown(e) {
       if (e.code !== "Space") return;
+
       e.preventDefault();
-      if (walk?.state.enabled) shootFromCamera();
-      else reset();
+
+      if (walk?.state.enabled) {
+        shootFromCamera();
+      } else {
+        reset();
+      }
     }
+
     window.addEventListener("keydown", onKeyDown);
+
     return () => window.removeEventListener("keydown", onKeyDown);
+  }
+
+  function applyOverrides(overrides = {}) {
+    liveOverrides = deepMerge(liveOverrides, overrides);
+
+    rebuildWorld();
+    resetTracking();
+
+    console.log("Live physics overrides applied:");
+    console.dir(liveOverrides);
+
+    return {
+      body,
+      world,
+      overrides: liveOverrides,
+    };
+  }
+
+  function clearOverrides() {
+    liveOverrides = {};
+
+    rebuildWorld();
+    resetTracking();
+
+    console.log("Live physics overrides cleared.");
+
+    return {
+      body,
+      world,
+      overrides: liveOverrides,
+    };
+  }
+
+  function getOverrides() {
+    return liveOverrides;
   }
 
   return {
@@ -217,6 +324,11 @@ export function createSimulationBridge({
     shootFromCamera,
     predictPath,
     attachInput,
+
+    applyOverrides,
+    clearOverrides,
+    getOverrides,
+
     getBody: () => body,
     getWorld: () => world,
   };

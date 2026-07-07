@@ -23,10 +23,13 @@ function deepMerge(base, override = {}) {
 }
 
 function run({ overrides = {}, steps = 120, dt = 1 / 120 } = {}) {
-  const ball = new Basketball();
-
   currentOverrides = deepMerge(currentOverrides, overrides);
 
+  if (simulation) {
+    simulation.applyOverrides(currentOverrides);
+  }
+
+  const ball = new Basketball();
   const world = new PhysicsWorld(ball, currentOverrides);
   const rows = [];
 
@@ -35,27 +38,18 @@ function run({ overrides = {}, steps = 120, dt = 1 / 120 } = {}) {
 
     rows.push({
       t: Number((i * dt).toFixed(3)),
-
       x: Number(ball.position.x.toFixed(3)),
       y: Number(ball.position.y.toFixed(3)),
       z: Number(ball.position.z.toFixed(3)),
-
       vx: Number(ball.v.x.toFixed(3)),
       vy: Number(ball.v.y.toFixed(3)),
       vz: Number(ball.v.z.toFixed(3)),
       speed: Number(ball.v.length().toFixed(3)),
-
       ax: Number(ball.a.x.toFixed(3)),
       ay: Number(ball.a.y.toFixed(3)),
       az: Number(ball.a.z.toFixed(3)),
-
       omega: Number(ball.omega.length().toFixed(3)),
       energy: Number((world.lastEnergyAnalysis?.current?.E ?? 0).toFixed(3)),
-
-      ground: ball.touchedGround,
-      rim: ball.touchedRim,
-      backboard: ball.touchedBackboard,
-      score: ball.hasScored,
     });
   }
 
@@ -179,7 +173,7 @@ function help() {
   console.groupEnd();
 }
 
-export function exposePhysicsLab() {
+export function exposePhysicsLab(simulation = null) {
   window.PhysicsLab = {
     run,
     help,
