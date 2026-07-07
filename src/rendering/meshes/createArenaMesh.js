@@ -1,27 +1,24 @@
 import * as THREE from "three";
 
-// ===== أبعاد الملعب المرجعية (للتموضع فقط، ليست فيزياء) =====
 const COURT = {
   halfLength: 14,
   halfWidth: 7.5,
   freeZone: 2,
 };
 
-// ===== تخطيط المدرّج (مصدر واحد يشاركه الجمهور) =====
 export const STAND = {
   rows: 9,
   seatsPerRow: 46,
   seatWidth: 0.5,
-  rowRise: 0.42, // ارتفاع الدرجة
-  rowDepth: 0.92, // عمق الدرجة
-  baseY: 0.25, // ارتفاع أول صف
-  frontGap: 0.7, // فجوة عن حافة المنطقة الحرة
+  rowRise: 0.42, 
+  rowDepth: 0.92, 
+  baseY: 0.25, 
+  frontGap: 0.7, 
 };
 
 STAND.width = STAND.seatsPerRow * STAND.seatWidth;
 STAND.frontZ = COURT.halfWidth + COURT.freeZone + STAND.frontGap;
 
-// موضع مركز أي مقعد (side = ±1, row, seat)
 export function seatAnchor(side, row, seat) {
   const x = -STAND.width / 2 + STAND.seatWidth / 2 + seat * STAND.seatWidth;
   const y = STAND.baseY + row * STAND.rowRise;
@@ -33,7 +30,6 @@ function mat(color, roughness = 0.85, metalness = 0.0) {
   return new THREE.MeshStandardMaterial({ color, roughness, metalness });
 }
 
-// ===== الأرضية الخضراء (كما كانت) =====
 const textureLoader = new THREE.TextureLoader();
 const grassColor = textureLoader.load("/texture/Grass/color.png");
 grassColor.wrapS = THREE.RepeatWrapping;
@@ -44,14 +40,13 @@ grassColor.colorSpace = THREE.SRGBColorSpace;
 const groundGeometry = new THREE.PlaneGeometry(500, 500);
 groundGeometry.rotateX(-Math.PI / 2);
 
-// ===== الهيكل المتدرّج لجهة واحدة =====
 function createStandStructure(side) {
   const group = new THREE.Group();
 
-  const deckMat = mat(0x8f98a3, 0.9); // خرسانة فاتحة
-  const riserMat = mat(0x39434f, 0.85); // واجهة الدرجة الداكنة
-  const wallMat = mat(0x222c37, 0.9); // جدران المدرّج
-  const railMat = mat(0xb23a26, 0.5, 0.1); // حاجز أمامي
+  const deckMat = mat(0x8f98a3, 0.9); 
+  const riserMat = mat(0x39434f, 0.85); 
+  const wallMat = mat(0x222c37, 0.9); 
+  const railMat = mat(0xb23a26, 0.5, 0.1); 
 
   const totalDepth = STAND.rows * STAND.rowDepth;
   const totalRise = STAND.rows * STAND.rowRise;
@@ -81,7 +76,6 @@ function createStandStructure(side) {
     group.add(riser);
   }
 
-  // جدار خلفي
   const backWall = new THREE.Mesh(
     new THREE.BoxGeometry(STAND.width + 0.7, totalRise + 0.7, 0.18),
     wallMat
@@ -94,7 +88,6 @@ function createStandStructure(side) {
   backWall.receiveShadow = true;
   group.add(backWall);
 
-  // جداران جانبيان
   for (const sx of [-1, 1]) {
     const sideWall = new THREE.Mesh(
       new THREE.BoxGeometry(0.2, totalRise + 0.5, totalDepth + 0.2),
@@ -109,7 +102,6 @@ function createStandStructure(side) {
     group.add(sideWall);
   }
 
-  // حاجز أمامي بين الملعب والمدرّج
   const rail = new THREE.Mesh(
     new THREE.BoxGeometry(STAND.width + 0.5, 0.85, 0.12),
     railMat
@@ -121,7 +113,6 @@ function createStandStructure(side) {
   return group;
 }
 
-// ===== المقاعد الفردية (InstancedMesh: نداء رسم واحد) =====
 function createSeats() {
   const count = STAND.rows * STAND.seatsPerRow * 2;
 
@@ -141,8 +132,8 @@ function createSeats() {
 
   const dummy = new THREE.Object3D();
   const color = new THREE.Color();
-  const bandA = new THREE.Color(0x1b3a63); // أزرق داكن
-  const bandB = new THREE.Color(0xb23a26); // نطاق أحمر
+  const bandA = new THREE.Color(0x1b3a63); 
+  const bandB = new THREE.Color(0xb23a26); 
 
   let i = 0;
   for (const side of [1, -1]) {
@@ -203,7 +194,6 @@ export function createArenaMesh() {
   return group;
 }
 
-// ===== الجدار المحيط + إنارة الجدران =====
 const ENCLOSURE = {
   halfX: 22,
   halfZ: 20,
@@ -212,7 +202,6 @@ const ENCLOSURE = {
   color: 0x2b3039,
 };
 
-// وحدة إنارة مثبّتة على الجدار تصوّب للأسفل والداخل
 function addDownlight(group, x, y, z, targetX, targetZ) {
   const fixture = new THREE.Mesh(
     new THREE.BoxGeometry(0.42, 0.2, 0.3),
@@ -229,11 +218,10 @@ function addDownlight(group, x, y, z, targetX, targetZ) {
       emissiveIntensity: 2.5,
     })
   );
-  face.rotation.x = -Math.PI / 2; // موجّه للأسفل
+  face.rotation.x = -Math.PI / 2; 
   face.position.set(x, y - 0.11, z);
   group.add(face);
 
-  // شدة/عدد الأضواء قابلة للضبط — قلّليها لو ثقل الأداء
   const spot = new THREE.SpotLight(0xfff2d5, 45, 18, Math.PI / 5, 0.5, 1.5);
   spot.position.set(x, y, z);
   spot.target.position.set(targetX, 0, targetZ);
@@ -269,16 +257,14 @@ function createEnclosure() {
   group.add(north, south, west, east);
 
   const lightY = height - 0.5;
-  const inward = 7; // كم يدخل مخروط الضوء نحو المركز
+  const inward = 7; 
 
-  // جداران طويلان (±Z): 5 أضواء لكل جدار
   const longXs = [-16, -8, 0, 8, 16];
   for (const x of longXs) {
     addDownlight(group, x, lightY, -halfZ + 0.3, x, -halfZ + inward);
     addDownlight(group, x, lightY, halfZ - 0.3, x, halfZ - inward);
   }
 
-  // جداران قصيران (±X): 4 أضواء لكل جدار
   const shortZs = [-12, -4, 4, 12];
   for (const z of shortZs) {
     addDownlight(group, -halfX + 0.3, lightY, z, -halfX + inward, z);

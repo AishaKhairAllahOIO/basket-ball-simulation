@@ -23,7 +23,6 @@ function createSingleBackboard(side) {
   boardMesh.castShadow = true;
   boardMesh.receiveShadow = true;
 
-  // المستطيل الداخلي: 0.61م عرضاً × 0.46م ارتفاعاً، حافته السفلية بمستوى الطوق
   const targetSquare = new THREE.LineSegments(
     new THREE.EdgesGeometry(new THREE.BoxGeometry(0.01, 0.46, 0.61)),
     new THREE.LineBasicMaterial({ color: 0xff6b35 })

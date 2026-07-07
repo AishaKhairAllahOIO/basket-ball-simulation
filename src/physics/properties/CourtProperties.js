@@ -2,8 +2,8 @@ import { CourtGeometry } from "./CourtGeometry.js";
 
 const halfLength = CourtGeometry.length / 2;
 
-const basketX = halfLength - CourtGeometry.basketCenterFromEndLine; // 12.425
-const backboardFaceX = halfLength - CourtGeometry.backboardFaceFromEndLine; // 12.80
+const basketX = halfLength - CourtGeometry.basketCenterFromEndLine; 
+const backboardFaceX = halfLength - CourtGeometry.backboardFaceFromEndLine; 
 
 const backboardWidth = 1.8; 
 const backboardHeight = 1.05; 
@@ -21,8 +21,8 @@ export const CourtProperties = Object.freeze({
     y: 3.05,
     z: 0,
 
-    rimInnerDiameter: 0.45, // FIBA: 450–459مم
-    rimMetalDiameter: 0.018, // FIBA: 16–20مم
+    rimInnerDiameter: 0.45, 
+    rimMetalDiameter: 0.018, 
 
     stiffness: 18000,
     damping: 110,

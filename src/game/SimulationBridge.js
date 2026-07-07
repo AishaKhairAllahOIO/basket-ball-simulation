@@ -31,13 +31,11 @@ function configureBody(body, { position, velocity, omega }) {
   body.touchedBackboard = false;
 }
 
-// سرعة تصويبة من زاوية/سرعة نحو محور +x (السلة)
 function velocityFromAngle(speed, angleDeg) {
   const theta = (angleDeg * Math.PI) / 180;
   return new THREE.Vector3(Math.cos(theta) * speed, Math.sin(theta) * speed, 0);
 }
 
-// دوران خلفي حول محور أفقي عمودي على اتجاه الحركة (يطابق إشارة Basketball الافتراضية)
 function backspinFor(direction, spinRev) {
   return new THREE.Vector3()
     .crossVectors(WORLD_UP, direction)
@@ -46,15 +44,14 @@ function backspinFor(direction, spinRev) {
 }
 
 export function createSimulationBridge({
-  ballMesh, // ناتج createBallMesh()
+  ballMesh, 
   scene = null,
-  trajectory = null, // TrajectoryRenderer (اختياري)
-  contactPoints = null, // ContactPointsRenderer (اختياري)
-  physicsDebugger = null, // PhysicsDebugger (اختياري)
-  walk = null, // createWalkControls للإطلاق من الكاميرا (اختياري)
+  trajectory = null, 
+  contactPoints = null,
+  physicsDebugger = null, 
+  walk = null, 
   onScore = null,
 
-  // تصويبة افتراضية (Space) — مضبوطة للمسافة الحقيقية للسلة
   defaultShot = {
     position: new THREE.Vector3(
       CourtGeometry.player.position.x,
@@ -68,7 +65,6 @@ export function createSimulationBridge({
 
   cameraShot = { speed: 10.5, spinRev: 6 },
 } = {}) {
-  // لا نُعدّل ملعب الفيزياء: هو المصدر الوحيد، والراندر يتبعه عبر courtLayout
   const courtOverrides = {};
 
   const body = new Basketball();
@@ -91,7 +87,6 @@ export function createSimulationBridge({
     contactPoints?.clear();
   }
 
-  // تصويبة افتراضية (نحو السلة)
   function reset() {
     configureBody(body, {
       position: defaultShot.position.clone(),
@@ -102,7 +97,6 @@ export function createSimulationBridge({
     resetTracking();
   }
 
-  // إطلاق حرّ من موضع/اتجاه معيّن
   function shoot({ position, velocity, omega }) {
     configureBody(body, {
       position: position.clone(),
@@ -113,7 +107,6 @@ export function createSimulationBridge({
     resetTracking();
   }
 
-  // إطلاق من الكاميرا (وضع C): نقطة النظر واتجاهه
   function shootFromCamera(overrides = {}) {
     if (!walk) return false;
     const { origin, direction } = walk.getShotRay();
@@ -129,7 +122,6 @@ export function createSimulationBridge({
   }
   
 
-  // مسار متوقّع دقيق (نفس الفيزياء على جسم مؤقت، لا يمسّ المحاكاة الحية)
   function predictPath({ position, velocity, omega }, duration = 2, dt = 1 / 60) {
     const ghost = new Basketball();
     configureBody(ghost, {
@@ -153,7 +145,6 @@ export function createSimulationBridge({
   function syncVisual(dt) {
     ballMesh.position.copy(body.position);
 
-    // دوران بصري من السرعة الزاوية
     const angle = body.omega.length() * dt;
     if (angle > 1e-6) {
       tmpAxis.copy(body.omega).normalize();
@@ -169,7 +160,6 @@ export function createSimulationBridge({
     trajectory.render(trajectoryPoints);
   }
 
-  // علامات تلامس تقريبية عند لحظة أول ملامسة (الفيزياء لا تُصدّر نقاط التلامس حالياً)
   function updateContactMarkers() {
     if (!contactPoints) return;
     if (body.touchedGround && !lastTouched.ground) contactPoints.add(body.position);
@@ -189,7 +179,6 @@ export function createSimulationBridge({
     updateTrajectory();
     updateContactMarkers();
 
-    // محوّل أسماء الحقول لـ PhysicsDebugger (يتوقع velocity/angularVelocity)
     physicsDebugger?.printBall({
       position: body.position,
       velocity: body.v,
@@ -204,7 +193,6 @@ export function createSimulationBridge({
     return result;
   }
 
-  // ربط اختياري: Space يصوّب (من الكاميرا في وضع C، وإلا التصويبة الافتراضية)
   function attachInput() {
     function onKeyDown(e) {
       if (e.code !== "Space") return;

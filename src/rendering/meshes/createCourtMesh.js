@@ -471,20 +471,20 @@ function createCourtGlowBorder() {
   const outerLength = COURT.length + COURT.freeZone * 2;
   const outerWidth = COURT.width + COURT.freeZone * 2;
 
-  const glowColor = 0xffff88;        // ← أزرق فاتح متوهج (كان 0xffff88 أصفر)
-  const stripWidth = 0.12;           // ← أعرض شوي (كان 0.08)
-  const y = 0.06;                    // ← ارفعيه فوق الحافة الزرقاء عشان يبان
+  const glowColor = 0xffff88;        
+  const stripWidth = 0.12;         
+  const y = 0.06;                    
 
   const glowMaterial = new THREE.MeshBasicMaterial({
     color: glowColor,
     transparent: true,
-    opacity: 1.0,                    // ← أقوى (كان 0.95)
+    opacity: 1.0,                 
   });
 
   const softGlowMaterial = new THREE.MeshBasicMaterial({
     color: glowColor,
     transparent: true,
-    opacity: 0.45,                   // ← هالة أوضح (كان 0.28)
+    opacity: 0.45,                  
     depthWrite: false,
   });
 
@@ -512,7 +512,6 @@ function createCourtGlowBorder() {
   addStrip(stripWidth, outerWidth, -halfL, 0);
   addStrip(stripWidth, outerWidth, halfL, 0);
 
-  // أضواء نقطية موزعة على الحواف عشان التوهج يضيء الأرض
   const cornerLights = [
     [halfL, -halfW], [halfL, halfW],
     [-halfL, -halfW], [-halfL, halfW],
@@ -539,7 +538,7 @@ export function createCourtMesh() {
   const freeZone = new THREE.Mesh(
     new THREE.BoxGeometry(
       COURT.length + COURT.freeZone * 2,
-      0.05,                              // ← كان 0.025، خليناه أسمك
+      0.05,                          
       COURT.width + COURT.freeZone * 2
     ),
     material(COLORS.freeZone, {
@@ -548,7 +547,7 @@ export function createCourtMesh() {
     })
   );
 
-  freeZone.position.y = 0.01;            // ← كان -0.035، رفعناه فوق العشب
+  freeZone.position.y = 0.01;           
   freeZone.receiveShadow = true;
 
   const courtGeometry = addUv2(

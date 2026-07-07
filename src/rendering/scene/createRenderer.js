@@ -13,7 +13,7 @@ export function createRenderer() {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.7;  // زيديها لو غامق، قلليها لو محروق
+  renderer.toneMappingExposure = 0.7;  
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   return renderer;

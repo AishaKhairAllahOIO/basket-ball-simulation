@@ -9,7 +9,6 @@ const LIGHT_POLES = [
 function createPole({ x, z, targetX, targetZ }) {
   const lightGroup = new THREE.Group();
 
-  // ===== الشكل الفيزيائي للعمود =====
   const poleParts = new THREE.Group();
 
   const pole = new THREE.Mesh(
@@ -39,26 +38,25 @@ function createPole({ x, z, targetX, targetZ }) {
     new THREE.MeshStandardMaterial({
       color: 0xfff4c7,
       emissive: 0xffe4a3,
-      emissiveIntensity: 3.0,          // ← أقوى عشان يبان اللمبة مضيئة
+      emissiveIntensity: 3.0,          
     })
   );
   lightFace.position.set(0, 4.88, -0.9);
 
   poleParts.add(pole, arm, lamp, lightFace);
   poleParts.position.set(x, 0, z);
-  poleParts.lookAt(targetX, 0, targetZ);   // يلف الشكل فقط نحو الملعب
+  poleParts.lookAt(targetX, 0, targetZ);   
 
-  // ===== الضوء الفعلي (منفصل، بموقع مطلق) =====
   const spot = new THREE.SpotLight(
-    0xfff2d5,      // لون أبيض دافئ
-    120,           // ← شدة عالية (مع الإضاءة الفيزيائية الحديثة)
-    40,            // المدى
-    Math.PI / 5,   // زاوية المخروط (أوسع شوي)
-    0.4,           // نعومة الحواف
-    1.5            // الخفوت مع المسافة
+    0xfff2d5,      
+    120,        
+    40,           
+    Math.PI / 5, 
+    0.4,          
+    1.5           
   );
-  spot.position.set(x, 5.0, z);              // رأس العمود
-  spot.target.position.set(targetX, 0, targetZ);  // يصوّب على الملعب
+  spot.position.set(x, 5.0, z);              
+  spot.target.position.set(targetX, 0, targetZ);  
 
   spot.castShadow = true;
   spot.shadow.mapSize.set(1024, 1024);

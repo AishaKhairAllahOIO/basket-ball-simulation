@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { STAND, seatAnchor } from "./createArenaMesh.js";
 
-// جمهور جالس فوق مقاعد المدرّج (نفس تخطيط createArenaMesh)
 const SHIRTS = [
   0xe6482e, 0xf2c14e, 0x2e8bd6, 0x36b37e, 0x8e5bd0,
   0xecf0f1, 0xe67e22, 0x16a99b, 0xd94f8a, 0x4a63d0,
@@ -9,7 +8,7 @@ const SHIRTS = [
 
 const SKINS = [0xf2c79b, 0xe0a06e, 0xc7834e, 0x9c6438, 0x7a4a28];
 
-const EMPTY_CHANCE = 0.12; // نسبة المقاعد الفارغة
+const EMPTY_CHANCE = 0.12; 
 
 export function createAudienceMesh() {
   const group = new THREE.Group();
@@ -43,7 +42,6 @@ export function createAudienceMesh() {
       for (let seat = 0; seat < STAND.seatsPerRow; seat++) {
         const a = seatAnchor(side, row, seat);
 
-        // مقعد فارغ: نخفي النسخة بعيداً
         if (Math.random() < EMPTY_CHANCE) {
           dummy.rotation.set(0, 0, 0);
           dummy.scale.set(0.0001, 0.0001, 0.0001);
@@ -59,24 +57,21 @@ export function createAudienceMesh() {
           continue;
         }
 
-        const courtDir = -side; // اتجاه الملعب على محور z
+        const courtDir = -side; 
         const jx = (Math.random() - 0.5) * 0.06;
         const s = 0.94 + Math.random() * 0.14;
 
         dummy.rotation.set(0, 0, 0);
         dummy.scale.set(s, s, s);
 
-        // الجذع
         dummy.position.set(a.x + jx, a.y + 0.5, a.z - side * 0.02);
         dummy.updateMatrix();
         torso.setMatrixAt(i, dummy.matrix);
 
-        // الرأس
         dummy.position.set(a.x + jx, a.y + 0.78, a.z - side * 0.06);
         dummy.updateMatrix();
         head.setMatrixAt(i, dummy.matrix);
 
-        // الأفخاذ نحو الملعب
         dummy.position.set(a.x + jx, a.y + 0.28, a.z + courtDir * 0.16);
         dummy.updateMatrix();
         lap.setMatrixAt(i, dummy.matrix);
