@@ -7,19 +7,16 @@ import { StaticFriction } from "./StaticFriction.js";
 import { KineticFriction } from "./KineticFriction.js";
 import { NetResistance } from "./NetResistance.js";
 import { AngularDamping } from "./AngularDamping.js";
+import { RollingResistance } from "../response/RollingResistance.js";
 
 export function ForceAccumulator(body, contacts, config, dt) {
   body.addForce(Gravity(body, config));
-
   body.addForce(AerodynamicDrag(body, config));
-
   body.addForce(MagnusEffect(body, config));
-
   body.addForce(Buoyancy(body, config));
 
   for (const contact of contacts) {
     const Fn = NormalForce(body, contact);
-
     body.addForce(Fn);
 
     const normalForceMagnitude = Fn.length();
@@ -40,10 +37,7 @@ export function ForceAccumulator(body, contacts, config, dt) {
       body.addTorque(staticFriction.tau);
     }
 
-    if (
-      !staticFriction.canApplyStatic &&
-      config.enabled.kineticFriction
-    ) {
+    if (!staticFriction.canApplyStatic && config.enabled.kineticFriction) {
       const kineticFriction = KineticFriction(
         body,
         contact,
@@ -52,6 +46,18 @@ export function ForceAccumulator(body, contacts, config, dt) {
 
       body.addForce(kineticFriction.Ff);
       body.addTorque(kineticFriction.tau);
+    }
+
+    if (
+      contact.type === "ground" &&
+      config.enabled.rollingResistance
+    ) {
+      body.addForce(
+        RollingResistance(
+          body,
+          config.ball.friction.rollingCoefficient ?? 0.02
+        )
+      );
     }
   }
 
