@@ -44,11 +44,16 @@ this.lastEnergyAnalysis = null;
 
       const netState = this.computeNetState();
 
-      ForceAccumulator(this.body, contacts, {
-        ...this.config,
-        netState,
-      });
-
+     
+      ForceAccumulator(
+  this.body,
+  contacts,
+  {
+    ...this.config,
+    netState,
+  },
+  dt
+);
       applyLinearMotion(this.body);
       applyAngularMotion(this.body);
 

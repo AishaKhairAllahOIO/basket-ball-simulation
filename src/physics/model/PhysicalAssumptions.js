@@ -1,10 +1,3 @@
-/**
- * Physical assumptions adopted by the simulation.
- *
- * These assumptions define the mathematical model before any numerical
- * integration or collision handling is applied.
- */
-
 export const PhysicalAssumptions = Object.freeze({
 
   rigidBody: true,
@@ -25,7 +18,7 @@ export const PhysicalAssumptions = Object.freeze({
 
   noPermanentDeformation: true,
 
-  neglectEarthRotation: true,
+  neglectEarthRotation: true, //coreolos
 
   neglectRelativity: true,
 

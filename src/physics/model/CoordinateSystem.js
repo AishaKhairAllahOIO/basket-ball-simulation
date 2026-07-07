@@ -1,7 +1,3 @@
-/**
- * Global coordinate system used by the Basketball Physics Engine.
- */
-
 export const CoordinateSystem = Object.freeze({
 
   handedness: "Right-Handed",

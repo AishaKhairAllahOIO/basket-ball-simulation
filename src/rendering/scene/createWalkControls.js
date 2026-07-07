@@ -1,6 +1,13 @@
 import * as THREE from "three";
 
-export function createWalkControls(camera, renderer) {
+export function createWalkControls(camera, renderer, options = {}) {
+  const {
+    orbitControls = null, 
+    startPosition = { x: 2.8, z: 0 }, 
+    lookAt = { x: 12.425, y: 3.05, z: 0 }, 
+    onModeChange = null, 
+  } = options;
+
   const state = {
     enabled: false,
     moveForward: false,
@@ -10,7 +17,6 @@ export function createWalkControls(camera, renderer) {
     sprint: false,
     yaw: 0,
     pitch: 0,
-    velocity: new THREE.Vector3(),
   };
 
   const limits = {
@@ -21,22 +27,54 @@ export function createWalkControls(camera, renderer) {
     eyeHeight: 1.72,
   };
 
+  function aimAt(target) {
+    const dx = target.x - camera.position.x;
+    const dy = target.y - camera.position.y;
+    const dz = target.z - camera.position.z;
+    state.yaw = Math.atan2(-dx, -dz);
+    state.pitch = Math.atan2(dy, Math.hypot(dx, dz));
+  }
+
   function setEnabled(value) {
     state.enabled = value;
 
     if (value) {
-      camera.position.y = limits.eyeHeight;
+      camera.position.set(startPosition.x, limits.eyeHeight, startPosition.z);
+      aimAt(lookAt);
+
+      if (orbitControls) orbitControls.enabled = false;
+      if (player) player.visible = false;
+
       renderer.domElement.requestPointerLock?.();
     } else {
+      if (orbitControls) orbitControls.enabled = true;
+      if (player) player.visible = true;
+
       document.exitPointerLock?.();
     }
+
+    onModeChange?.(value);
   }
 
   function toggle() {
     setEnabled(!state.enabled);
   }
 
+  function getShotRay() {
+    const origin = camera.position.clone();
+    const direction = new THREE.Vector3();
+    camera.getWorldDirection(direction);
+    return { origin, direction };
+  }
+
   function onKeyDown(event) {
+    if (event.code === "KeyC") {
+      toggle();
+      return;
+    }
+
+    if (!state.enabled) return;
+
     if (event.code === "KeyW") state.moveForward = true;
     if (event.code === "KeyS") state.moveBackward = true;
     if (event.code === "KeyA") state.moveLeft = true;
@@ -66,18 +104,13 @@ export function createWalkControls(camera, renderer) {
     state.pitch -= event.movementY * sensitivity;
 
     const maxPitch = Math.PI / 2 - 0.08;
-
-    state.pitch = Math.max(
-      -maxPitch,
-      Math.min(maxPitch, state.pitch)
-    );
+    state.pitch = Math.max(-maxPitch, Math.min(maxPitch, state.pitch));
   }
 
   function update(deltaTime) {
     if (!state.enabled) return;
 
     const speed = state.sprint ? 6.5 : 3.2;
-
     const direction = new THREE.Vector3();
 
     if (state.moveForward) direction.z -= 1;
@@ -89,11 +122,7 @@ export function createWalkControls(camera, renderer) {
       direction.normalize();
 
       const yawQuaternion = new THREE.Quaternion();
-      yawQuaternion.setFromAxisAngle(
-        new THREE.Vector3(0, 1, 0),
-        state.yaw
-      );
-
+      yawQuaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), state.yaw);
       direction.applyQuaternion(yawQuaternion);
 
       camera.position.addScaledVector(direction, speed * deltaTime);
@@ -101,14 +130,12 @@ export function createWalkControls(camera, renderer) {
 
     camera.position.x = Math.max(
       limits.minX,
-      Math.min(limits.maxX, camera.position.x)
+      Math.min(limits.maxX, camera.position.x),
     );
-
     camera.position.z = Math.max(
       limits.minZ,
-      Math.min(limits.maxZ, camera.position.z)
+      Math.min(limits.maxZ, camera.position.z),
     );
-
     camera.position.y = limits.eyeHeight;
 
     camera.rotation.order = "YXZ";
@@ -132,6 +159,7 @@ export function createWalkControls(camera, renderer) {
     setEnabled,
     toggle,
     update,
+    getShotRay,
     dispose,
   };
 }

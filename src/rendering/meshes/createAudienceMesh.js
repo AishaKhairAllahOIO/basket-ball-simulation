@@ -1,100 +1,100 @@
 import * as THREE from "three";
+import { STAND, seatAnchor } from "./createArenaMesh.js";
 
-const shirtColors = [
-  0xf1c40f,
-  0xe74c3c,
-  0x3498db,
-  0x2ecc71,
-  0x9b59b6,
-  0xffffff,
-  0xe67e22,
-  0x1abc9c,
+// جمهور جالس فوق مقاعد المدرّج (نفس تخطيط createArenaMesh)
+const SHIRTS = [
+  0xe6482e, 0xf2c14e, 0x2e8bd6, 0x36b37e, 0x8e5bd0,
+  0xecf0f1, 0xe67e22, 0x16a99b, 0xd94f8a, 0x4a63d0,
 ];
 
-function createPerson(color) {
-  const person = new THREE.Group();
+const SKINS = [0xf2c79b, 0xe0a06e, 0xc7834e, 0x9c6438, 0x7a4a28];
 
-  const body = new THREE.Mesh(
-    new THREE.BoxGeometry(0.16, 0.24, 0.12),
-    new THREE.MeshStandardMaterial({
-      color,
-      roughness: 0.75,
-    })
-  );
-
-  body.position.y = 0.18;
-
-  const head = new THREE.Mesh(
-    new THREE.SphereGeometry(0.07, 16, 16),
-    new THREE.MeshStandardMaterial({
-      color: 0xf1c79b,
-      roughness: 0.7,
-    })
-  );
-
-  head.position.y = 0.36;
-
-  person.add(body);
-  person.add(head);
-
-  return person;
-}
-
-function createStandAudience({
-  side,
-  rows,
-  seatsPerRow,
-}) {
-  const group = new THREE.Group();
-
-  const firstRowZ = side * 10.9;
-
-  for (let row = 0; row < rows; row++) {
-    for (let seat = 0; seat < seatsPerRow; seat++) {
-      const color =
-        shirtColors[
-          (row * seatsPerRow + seat) %
-            shirtColors.length
-        ];
-
-      const person = createPerson(color);
-
-      person.position.set(
-        -10 + seat * 0.42,
-        0.32 + row * 0.28,
-        firstRowZ + side * row * 0.75
-      );
-
-      person.rotation.y =
-        side > 0 ? Math.PI : 0;
-
-      group.add(person);
-    }
-  }
-
-  return group;
-}
+const EMPTY_CHANCE = 0.12; // نسبة المقاعد الفارغة
 
 export function createAudienceMesh() {
   const group = new THREE.Group();
-
   group.name = "FIBA_Audience";
 
-  group.add(
-    createStandAudience({
-      side: -1,
-      rows: 7,
-      seatsPerRow: 48,
-    })
-  );
+  const count = STAND.rows * STAND.seatsPerRow * 2;
 
-  group.add(
-    createStandAudience({
-      side: 1,
-      rows: 7,
-      seatsPerRow: 48,
-    })
-  );
+  const torsoGeo = new THREE.BoxGeometry(0.32, 0.42, 0.24);
+  const headGeo = new THREE.SphereGeometry(0.11, 10, 10);
+  const lapGeo = new THREE.BoxGeometry(0.3, 0.16, 0.34); // أفخاذ
 
+  const torsoMat = new THREE.MeshStandardMaterial({ roughness: 0.8 });
+  const headMat = new THREE.MeshStandardMaterial({ roughness: 0.75 });
+  const lapMat = new THREE.MeshStandardMaterial({ roughness: 0.8, color: 0x2a2a2a });
+
+  const torso = new THREE.InstancedMesh(torsoGeo, torsoMat, count);
+  const head = new THREE.InstancedMesh(headGeo, headMat, count);
+  const lap = new THREE.InstancedMesh(lapGeo, lapMat, count);
+
+  torso.castShadow = true;
+  for (const m of [torso, head, lap]) {
+    m.frustumCulled = false;
+  }
+
+  const dummy = new THREE.Object3D();
+  const c = new THREE.Color();
+
+  let i = 0;
+  for (const side of [1, -1]) {
+    for (let row = 0; row < STAND.rows; row++) {
+      for (let seat = 0; seat < STAND.seatsPerRow; seat++) {
+        const a = seatAnchor(side, row, seat);
+
+        // مقعد فارغ: نخفي النسخة بعيداً
+        if (Math.random() < EMPTY_CHANCE) {
+          dummy.rotation.set(0, 0, 0);
+          dummy.scale.set(0.0001, 0.0001, 0.0001);
+          dummy.position.set(0, -50, 0);
+          dummy.updateMatrix();
+          torso.setMatrixAt(i, dummy.matrix);
+          head.setMatrixAt(i, dummy.matrix);
+          lap.setMatrixAt(i, dummy.matrix);
+          c.set(0x000000);
+          torso.setColorAt(i, c);
+          head.setColorAt(i, c);
+          i++;
+          continue;
+        }
+
+        const courtDir = -side; // اتجاه الملعب على محور z
+        const jx = (Math.random() - 0.5) * 0.06;
+        const s = 0.94 + Math.random() * 0.14;
+
+        dummy.rotation.set(0, 0, 0);
+        dummy.scale.set(s, s, s);
+
+        // الجذع
+        dummy.position.set(a.x + jx, a.y + 0.5, a.z - side * 0.02);
+        dummy.updateMatrix();
+        torso.setMatrixAt(i, dummy.matrix);
+
+        // الرأس
+        dummy.position.set(a.x + jx, a.y + 0.78, a.z - side * 0.06);
+        dummy.updateMatrix();
+        head.setMatrixAt(i, dummy.matrix);
+
+        // الأفخاذ نحو الملعب
+        dummy.position.set(a.x + jx, a.y + 0.28, a.z + courtDir * 0.16);
+        dummy.updateMatrix();
+        lap.setMatrixAt(i, dummy.matrix);
+
+        c.set(SHIRTS[(row * STAND.seatsPerRow + seat + (side > 0 ? 0 : 7)) % SHIRTS.length]);
+        torso.setColorAt(i, c);
+        c.set(SKINS[(seat * 3 + row) % SKINS.length]);
+        head.setColorAt(i, c);
+
+        i++;
+      }
+    }
+  }
+
+  torso.instanceMatrix.needsUpdate = true;
+  head.instanceMatrix.needsUpdate = true;
+  lap.instanceMatrix.needsUpdate = true;
+
+  group.add(torso, head, lap);
   return group;
 }

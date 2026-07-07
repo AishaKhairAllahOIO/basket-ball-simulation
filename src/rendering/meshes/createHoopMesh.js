@@ -1,14 +1,19 @@
 import * as THREE from "three";
-// import { basketballDimensions } from "../../physics/constants/studyConstants.js";
+import { CourtProperties } from "../../physics/properties/CourtProperties.js";
 
 function createSingleHoop(side) {
-  const hoop = basketballDimensions.hoop;
+  const hoop = CourtProperties.hoop;
   const group = new THREE.Group();
 
-  const x = side * Math.abs(hoop.position.x);
+  const x = side * Math.abs(hoop.x);
 
   const rim = new THREE.Mesh(
-    new THREE.TorusGeometry(hoop.radius, hoop.tubeRadius, 20, 160),
+    new THREE.TorusGeometry(
+      hoop.rimInnerDiameter / 2,
+      hoop.rimMetalDiameter / 2,
+      20,
+      160
+    ),
     new THREE.MeshStandardMaterial({
       color: 0xff4d1f,
       roughness: 0.28,
@@ -17,7 +22,7 @@ function createSingleHoop(side) {
   );
 
   rim.rotation.x = Math.PI / 2;
-  rim.position.set(x, hoop.height, 0);
+  rim.position.set(x, hoop.y, 0);
   rim.castShadow = true;
 
   const connector = new THREE.Mesh(
@@ -29,7 +34,7 @@ function createSingleHoop(side) {
     })
   );
 
-  connector.position.set(x + side * 0.28, hoop.height, 0);
+  connector.position.set(x + side * 0.28, hoop.y, 0);
   connector.castShadow = true;
 
   group.add(rim, connector);

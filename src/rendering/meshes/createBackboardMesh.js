@@ -1,14 +1,15 @@
 import * as THREE from "three";
-// import { basketballDimensions } from "../../physics/constants/studyConstants.js";
+import { CourtProperties } from "../../physics/properties/CourtProperties.js";
 
 function createSingleBackboard(side) {
-  // const b = basketballDimensions.backboard;
+  const board = CourtProperties.backboard;
+  const hoop = CourtProperties.hoop;
   const group = new THREE.Group();
 
-  const x = side * Math.abs(b.position.x);
+  const x = side * Math.abs(board.x);
 
-  const board = new THREE.Mesh(
-    new THREE.BoxGeometry(b.depth, b.height, b.width),
+  const boardMesh = new THREE.Mesh(
+    new THREE.BoxGeometry(board.depth, board.height, board.width),
     new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
       transparent: true,
@@ -18,16 +19,17 @@ function createSingleBackboard(side) {
     })
   );
 
-  board.position.set(x, b.position.y, 0);
-  board.castShadow = true;
-  board.receiveShadow = true;
+  boardMesh.position.set(x, board.y, 0);
+  boardMesh.castShadow = true;
+  boardMesh.receiveShadow = true;
 
+  // المستطيل الداخلي: 0.61م عرضاً × 0.46م ارتفاعاً، حافته السفلية بمستوى الطوق
   const targetSquare = new THREE.LineSegments(
-    new THREE.EdgesGeometry(new THREE.BoxGeometry(0.01, 0.45, 0.59)),
+    new THREE.EdgesGeometry(new THREE.BoxGeometry(0.01, 0.46, 0.61)),
     new THREE.LineBasicMaterial({ color: 0xff6b35 })
   );
 
-  targetSquare.position.set(x - side * 0.035, b.position.y + 0.05, 0);
+  targetSquare.position.set(x - side * 0.035, hoop.y + 0.23, 0);
 
   const support = new THREE.Mesh(
     new THREE.CylinderGeometry(0.045, 0.045, 3.05, 20),
@@ -40,7 +42,7 @@ function createSingleBackboard(side) {
   support.position.set(x + side * 0.45, 1.52, 0);
   support.castShadow = true;
 
-  group.add(board, targetSquare, support);
+  group.add(boardMesh, targetSquare, support);
 
   return group;
 }

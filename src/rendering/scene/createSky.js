@@ -1,6 +1,5 @@
-// createSky.js
-import { Sky } from 'three/examples/jsm/objects/Sky.js';
-import * as THREE from 'three';
+import { Sky } from "three/examples/jsm/objects/Sky.js";
+import * as THREE from "three";
 
 export function createSky(scene) {
   const sky = new Sky();
@@ -17,18 +16,17 @@ export function createSky(scene) {
   };
 
   const uniforms = sky.material.uniforms;
-  uniforms['turbidity'].value = effectController.turbidity;
-  uniforms['rayleigh'].value = effectController.rayleigh;
-  uniforms['mieCoefficient'].value = effectController.mieCoefficient;
-  uniforms['mieDirectionalG'].value = effectController.mieDirectionalG;
+  uniforms["turbidity"].value = effectController.turbidity;
+  uniforms["rayleigh"].value = effectController.rayleigh;
+  uniforms["mieCoefficient"].value = effectController.mieCoefficient;
+  uniforms["mieDirectionalG"].value = effectController.mieDirectionalG;
 
   const sun = new THREE.Vector3();
   const phi = THREE.MathUtils.degToRad(90 - effectController.elevation);
   const theta = THREE.MathUtils.degToRad(effectController.azimuth);
   sun.setFromSphericalCoords(1, phi, theta);
-  uniforms['sunPosition'].value.copy(sun);
+  uniforms["sunPosition"].value.copy(sun);
 
-  // إضاءة حقيقية تطابق موقع الشمس
   const sunLight = new THREE.DirectionalLight(0xffddaa, 1.5);
   sunLight.position.copy(sun).multiplyScalar(100);
   sunLight.castShadow = true;

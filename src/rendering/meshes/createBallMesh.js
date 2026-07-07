@@ -1,5 +1,5 @@
 import * as THREE from "three";
-// import { basketballDimensions } from "../../physics/constants/studyConstants.js";
+import { BasketballGeometry } from "../../physics/derived/BasketballGeometry.js";
 
 function createSeam(radius, rotation) {
   const seam = new THREE.Mesh(
@@ -15,7 +15,7 @@ function createSeam(radius, rotation) {
 }
 
 export function createBallMesh() {
-  const radius = basketballDimensions.ball.radius;
+  const radius = BasketballGeometry.R;
 
   const group = new THREE.Group();
   group.name = "BasketballMesh";

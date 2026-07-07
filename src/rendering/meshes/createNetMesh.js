@@ -1,12 +1,12 @@
 import * as THREE from "three";
-// import { basketballDimensions } from "../../physics/constants/studyConstants.js";
+import { CourtProperties } from "../../physics/properties/CourtProperties.js";
 
 function createSingleNet(side) {
   const group = new THREE.Group();
 
-  const hoop = basketballDimensions.hoop;
-  const rimRadius = hoop.radius;
-  const netHeight = 0.425;
+  const hoop = CourtProperties.hoop;
+  const rimRadius = hoop.rimInnerDiameter / 2;
+  const netHeight = CourtProperties.net.height;
 
   const material = new THREE.MeshStandardMaterial({
     color: 0xffffff,
@@ -44,7 +44,7 @@ function createSingleNet(side) {
     group.add(strand);
   }
 
-  group.position.set(side * Math.abs(hoop.position.x), hoop.height, 0);
+  group.position.set(side * Math.abs(hoop.x), hoop.y, 0);
 
   return group;
 }

@@ -1,30 +1,11 @@
 import * as THREE from "three";
-
-const COURT = {
-  length: 28,
-  width: 15,
-  freeZone: 2,
-
-  centerCircleRadius: 1.8,
-  basketCenterFromEndLine: 1.575,
-
-  restrictedAreaWidth: 4.9,
-  freeThrowLineFromEndLine: 5.8,
-  freeThrowCircleRadius: 1.8,
-
-  threePointRadius: 6.75,
-  threePointSideZ: 6.6,
-  noChargeRadius: 1.25,
-
-  laneMarkLength: 0.45,
-  advertisingBoardDepth: 0.42,
-};
+import { CourtGeometry as COURT } from "../../physics/properties/CourtGeometry.js";
 
 const COLORS = {
   outerGround: 0x7fc99e,
   freeZone: 0x2f3f9e,
   courtWood: 0xd8a63a,
-  paint: 0x80d5df,
+  paint: 0x33b5c4,
   advertising: 0xa8d956,
   white: 0xffffff,
 };
@@ -324,7 +305,7 @@ function createHalfCourt(side) {
       side * (halfLength - COURT.freeThrowLineFromEndLine / 2),
       0,
       COLORS.paint,
-      0.38
+      0.82
     )
   );
 
