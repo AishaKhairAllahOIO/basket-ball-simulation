@@ -6,7 +6,6 @@ import { createRenderer } from "../rendering/scene/createRenderer.js";
 import { createLights } from "../rendering/scene/createLights.js";
 import { createControls } from "../rendering/scene/createControls.js";
 import { createWalkControls } from "../rendering/scene/createWalkControls.js";
-
 import { createArenaMesh } from "../rendering/meshes/createArenaMesh.js";
 import { createAudienceMesh } from "../rendering/meshes/createAudienceMesh.js";
 import { createCourtMesh } from "../rendering/meshes/createCourtMesh.js";
@@ -15,15 +14,14 @@ import { createHoopMesh } from "../rendering/meshes/createHoopMesh.js";
 import { createNetMesh } from "../rendering/meshes/createNetMesh.js";
 import { createLightPolesMesh } from "../rendering/meshes/createLightPolesMesh.js";
 import { createBallMesh } from "../rendering/meshes/createBallMesh.js";
-
 import { TrajectoryRenderer } from "../rendering/debug/TrajectoryRenderer.js";
 import { ContactPointsRenderer } from "../rendering/debug/ContactPointsRenderer.js";
-
 import { createSimulationBridge } from "../game/SimulationBridge.js";
 import { exposePhysicsLab } from "../game/PhysicsConsoleLab.js";
 import { runPhysicsTest } from "../game/PhysicsConsoleTest.js";
 
-export function bootstrap() {
+export function bootstrap() 
+{
   const renderer = createRenderer();
   document.body.appendChild(renderer.domElement);
 
@@ -60,15 +58,15 @@ export function bootstrap() {
     contactPoints,
     walk,
     onScore() {
-      console.log("🏀 SCORE DETECTED");
+      console.log("=== SCORE DETECTED ===");
     },
   });
 
   simulation.reset();
   simulation.attachInput();
+  runPhysicsTest();
 
   exposePhysicsLab();
-  runPhysicsTest();
 
   window.simulation = simulation;
 
@@ -93,5 +91,4 @@ export function bootstrap() {
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  console.log("Game bootstrap ready.");
 }

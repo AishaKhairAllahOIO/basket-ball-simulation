@@ -19,7 +19,7 @@ export function runPhysicsTest() {
     );
 
     if (result?.hasScored) {
-      console.log("🏀 SCORE DETECTED");
+      console.log("=== SCORE DETECTED ===");
       break;
     }
   }

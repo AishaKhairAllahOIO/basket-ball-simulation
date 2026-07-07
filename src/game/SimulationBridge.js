@@ -6,12 +6,13 @@ import { CourtGeometry } from "../physics/properties/CourtGeometry.js";
 
 const WORLD_UP = new THREE.Vector3(0, 1, 0);
 
-function revToRadPerSecond(rev) {
+function revToRadPerSecond(rev) 
+{
   return rev * 2 * Math.PI;
 }
 
-// يضبط حالة الجسم لتصويبة جديدة (بدل بناء جسم جديد في كل مرة)
-function configureBody(body, { position, velocity, omega }) {
+function configureBody(body, { position, velocity, omega }) 
+{
   body.position.copy(position);
   body.previousPosition.copy(position);
 
@@ -31,12 +32,14 @@ function configureBody(body, { position, velocity, omega }) {
   body.touchedBackboard = false;
 }
 
-function velocityFromAngle(speed, angleDeg) {
+function velocityFromAngle(speed, angleDeg) 
+{
   const theta = (angleDeg * Math.PI) / 180;
   return new THREE.Vector3(Math.cos(theta) * speed, Math.sin(theta) * speed, 0);
 }
 
-function backspinFor(direction, spinRev) {
+function backspinFor(direction, spinRev) 
+{
   return new THREE.Vector3()
     .crossVectors(WORLD_UP, direction)
     .normalize()
@@ -52,7 +55,8 @@ export function createSimulationBridge({
   walk = null, 
   onScore = null,
 
-  defaultShot = {
+  defaultShot = 
+  {
     position: new THREE.Vector3(
       CourtGeometry.player.position.x,
       1.75,
@@ -64,7 +68,8 @@ export function createSimulationBridge({
   },
 
   cameraShot = { speed: 10.5, spinRev: 6 },
-} = {}) {
+} = {}) 
+{
   const courtOverrides = {};
 
   const body = new Basketball();
@@ -193,7 +198,8 @@ export function createSimulationBridge({
     return result;
   }
 
-  function attachInput() {
+  function attachInput() 
+  {
     function onKeyDown(e) {
       if (e.code !== "Space") return;
       e.preventDefault();
