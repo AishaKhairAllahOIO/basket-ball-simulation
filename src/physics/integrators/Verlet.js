@@ -1,5 +1,7 @@
-export class Verlet {
-  step(body, dt) {
+export class Verlet 
+{
+  step(body, dt) 
+  {
     const currentPosition = body.position.clone();
 
     const nextPosition = body.position
