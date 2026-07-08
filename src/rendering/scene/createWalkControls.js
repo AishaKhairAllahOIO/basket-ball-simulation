@@ -2,10 +2,9 @@ import * as THREE from "three";
 
 export function createWalkControls(camera, renderer, options = {}) {
   const {
-    orbitControls = null, 
-    startPosition = { x: 2.8, z: 0 }, 
-    lookAt = { x: 12.425, y: 3.05, z: 0 }, 
-    onModeChange = null, 
+    orbitControls = null,
+    startPosition = { x: 2.8, z: 0 },
+    lookAt = { x: 12.425, y: 3.05, z: 0 },
   } = options;
 
   const state = {
@@ -15,8 +14,8 @@ export function createWalkControls(camera, renderer, options = {}) {
     moveLeft: false,
     moveRight: false,
     sprint: false,
-    yaw: 0,
-    pitch: 0,
+    yaw: 0, 
+    pitch: 0, 
   };
 
   const limits = {
@@ -24,7 +23,7 @@ export function createWalkControls(camera, renderer, options = {}) {
     maxX: 16,
     minZ: -10.5,
     maxZ: 10.5,
-    eyeHeight: 1.72,
+    eyeHeight: 1.75, 
   };
 
   function aimAt(target) {
@@ -37,23 +36,17 @@ export function createWalkControls(camera, renderer, options = {}) {
 
   function setEnabled(value) {
     state.enabled = value;
-
     if (value) {
       camera.position.set(startPosition.x, limits.eyeHeight, startPosition.z);
       aimAt(lookAt);
 
       if (orbitControls) orbitControls.enabled = false;
-      if (player) player.visible = false;
 
       renderer.domElement.requestPointerLock?.();
     } else {
       if (orbitControls) orbitControls.enabled = true;
-      if (player) player.visible = true;
-
       document.exitPointerLock?.();
     }
-
-    onModeChange?.(value);
   }
 
   function toggle() {
@@ -67,6 +60,20 @@ export function createWalkControls(camera, renderer, options = {}) {
     return { origin, direction };
   }
 
+  function onMouseMove(event) {
+    if (!state.enabled) return;
+    
+    if (document.pointerLockElement !== renderer.domElement) return;
+
+    const sensitivity = 0.0022; 
+
+    state.yaw -= event.movementX * sensitivity;
+    state.pitch -= event.movementY * sensitivity;
+
+    const maxPitch = Math.PI / 2 - 0.08;
+    state.pitch = Math.max(-maxPitch, Math.min(maxPitch, state.pitch));
+  }
+
   function onKeyDown(event) {
     if (event.code === "KeyC") {
       toggle();
@@ -75,36 +82,19 @@ export function createWalkControls(camera, renderer, options = {}) {
 
     if (!state.enabled) return;
 
-    if (event.code === "KeyW") state.moveForward = true;
-    if (event.code === "KeyS") state.moveBackward = true;
-    if (event.code === "KeyA") state.moveLeft = true;
-    if (event.code === "KeyD") state.moveRight = true;
-    if (event.code === "ShiftLeft" || event.code === "ShiftRight") {
-      state.sprint = true;
-    }
+    if (event.code === "ArrowUp") state.moveForward = true;
+    if (event.code === "ArrowDown") state.moveBackward = true;
+    if (event.code === "ArrowLeft") state.moveLeft = true;
+    if (event.code === "ArrowRight") state.moveRight = true;
+    if (event.code === "ShiftLeft" || event.code === "ShiftRight") state.sprint = true;
   }
 
   function onKeyUp(event) {
-    if (event.code === "KeyW") state.moveForward = false;
-    if (event.code === "KeyS") state.moveBackward = false;
-    if (event.code === "KeyA") state.moveLeft = false;
-    if (event.code === "KeyD") state.moveRight = false;
-    if (event.code === "ShiftLeft" || event.code === "ShiftRight") {
-      state.sprint = false;
-    }
-  }
-
-  function onMouseMove(event) {
-    if (!state.enabled) return;
-    if (document.pointerLockElement !== renderer.domElement) return;
-
-    const sensitivity = 0.0022;
-
-    state.yaw -= event.movementX * sensitivity;
-    state.pitch -= event.movementY * sensitivity;
-
-    const maxPitch = Math.PI / 2 - 0.08;
-    state.pitch = Math.max(-maxPitch, Math.min(maxPitch, state.pitch));
+    if (event.code === "ArrowUp") state.moveForward = false;
+    if (event.code === "ArrowDown") state.moveBackward = false;
+    if (event.code === "ArrowLeft") state.moveLeft = false;
+    if (event.code === "ArrowRight") state.moveRight = false;
+    if (event.code === "ShiftLeft" || event.code === "ShiftRight") state.sprint = false;
   }
 
   function update(deltaTime) {
@@ -120,7 +110,6 @@ export function createWalkControls(camera, renderer, options = {}) {
 
     if (direction.lengthSq() > 0) {
       direction.normalize();
-
       const yawQuaternion = new THREE.Quaternion();
       yawQuaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), state.yaw);
       direction.applyQuaternion(yawQuaternion);
@@ -128,26 +117,14 @@ export function createWalkControls(camera, renderer, options = {}) {
       camera.position.addScaledVector(direction, speed * deltaTime);
     }
 
-    camera.position.x = Math.max(
-      limits.minX,
-      Math.min(limits.maxX, camera.position.x),
-    );
-    camera.position.z = Math.max(
-      limits.minZ,
-      Math.min(limits.maxZ, camera.position.z),
-    );
+    camera.position.x = Math.max(limits.minX, Math.min(limits.maxX, camera.position.x));
+    camera.position.z = Math.max(limits.minZ, Math.min(limits.maxZ, camera.position.z));
     camera.position.y = limits.eyeHeight;
 
-    camera.rotation.order = "YXZ";
+    camera.rotation.order = "YXZ"; 
     camera.rotation.y = state.yaw;
     camera.rotation.x = state.pitch;
     camera.rotation.z = 0;
-  }
-
-  function dispose() {
-    window.removeEventListener("keydown", onKeyDown);
-    window.removeEventListener("keyup", onKeyUp);
-    window.removeEventListener("mousemove", onMouseMove);
   }
 
   window.addEventListener("keydown", onKeyDown);
@@ -160,6 +137,5 @@ export function createWalkControls(camera, renderer, options = {}) {
     toggle,
     update,
     getShotRay,
-    dispose,
   };
 }

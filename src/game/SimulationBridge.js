@@ -51,11 +51,7 @@ function configureBody(body, { position, velocity, omega }) {
 function velocityFromAngle(speed, angleDeg) {
   const theta = (angleDeg * Math.PI) / 180;
 
-  return new THREE.Vector3(
-    Math.cos(theta) * speed,
-    Math.sin(theta) * speed,
-    0
-  );
+  return new THREE.Vector3(Math.cos(theta) * speed, Math.sin(theta) * speed, 0);
 }
 
 function backspinFor(direction, spinRev) {
@@ -73,12 +69,13 @@ export function createSimulationBridge({
   physicsDebugger = null,
   walk = null,
   onScore = null,
+  onAttempt = null,
 
   defaultShot = {
     position: new THREE.Vector3(
       CourtGeometry.player.position.x,
       1.75,
-      CourtGeometry.player.position.z
+      CourtGeometry.player.position.z,
     ),
     speed: 11.0,
     angleDeg: 52,
@@ -128,19 +125,27 @@ export function createSimulationBridge({
     world = new PhysicsWorld(body, liveOverrides);
   }
 
-  function reset() {
+  function placeAtRest() {
     configureBody(body, {
       position: defaultShot.position.clone(),
-      velocity: velocityFromAngle(defaultShot.speed, defaultShot.angleDeg),
-      omega: new THREE.Vector3(
-        0,
-        0,
-        -revToRadPerSecond(defaultShot.spinRev)
-      ),
+      velocity: new THREE.Vector3(0, 0, 0),
+      omega: new THREE.Vector3(0, 0, 0),
     });
 
     rebuildWorld();
     resetTracking();
+  }
+
+  function launchDefaultShot() {
+    configureBody(body, {
+      position: defaultShot.position.clone(),
+      velocity: velocityFromAngle(defaultShot.speed, defaultShot.angleDeg),
+      omega: new THREE.Vector3(0, 0, -revToRadPerSecond(defaultShot.spinRev)),
+    });
+
+    rebuildWorld();
+    resetTracking();
+    onAttempt?.();
   }
 
   function shoot({ position, velocity, omega }) {
@@ -152,6 +157,7 @@ export function createSimulationBridge({
 
     rebuildWorld();
     resetTracking();
+    onAttempt?.();
   }
 
   function shootFromCamera(overrides = {}) {
@@ -171,7 +177,11 @@ export function createSimulationBridge({
     return true;
   }
 
-  function predictPath({ position, velocity, omega }, duration = 2, dt = 1 / 60) {
+  function predictPath(
+    { position, velocity, omega },
+    duration = 2,
+    dt = 1 / 60,
+  ) {
     const ghost = new Basketball();
 
     configureBody(ghost, {
@@ -264,21 +274,28 @@ export function createSimulationBridge({
     return result;
   }
 
+  const MIN_SPEED = 6.0;
+  const MAX_SPEED = 15.0;
+  let currentSpeed = cameraShot.speed;
+
   function attachInput() {
     function onKeyDown(e) {
+      if (e.code === "KeyR") {
+        placeAtRest();
+        return;
+      }
       if (e.code !== "Space") return;
 
       e.preventDefault();
 
-      if (walk?.state.enabled) {
-        shootFromCamera();
+      if (walk && walk.state.enabled) {
+        shootFromCamera({ speed: currentSpeed });
       } else {
-        reset();
+        launchDefaultShot();
       }
     }
 
     window.addEventListener("keydown", onKeyDown);
-
     return () => window.removeEventListener("keydown", onKeyDown);
   }
 
@@ -319,7 +336,8 @@ export function createSimulationBridge({
 
   return {
     update,
-    reset,
+    placeAtRest,
+    launchDefaultShot,
     shoot,
     shootFromCamera,
     predictPath,

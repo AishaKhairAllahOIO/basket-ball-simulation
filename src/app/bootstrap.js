@@ -19,12 +19,21 @@ import { ContactPointsRenderer } from "../rendering/debug/ContactPointsRenderer.
 import { createSimulationBridge } from "../game/SimulationBridge.js";
 import { exposePhysicsLab } from "../game/PhysicsConsoleLab.js";
 import { runPhysicsTest } from "../game/PhysicsConsoleTest.js";
+import { UIManager } from "../ui/UIManager.js";
+import { AudioManager } from "../audio/AudioManager.js";
 
-export function bootstrap() 
-{
+
+export function bootstrap() {
   const renderer = createRenderer();
-  document.body.appendChild(renderer.domElement);
+  const container = document.getElementById("app-container");
+  if (container) {
+    container.appendChild(renderer.domElement);
+  } else {
+    console.error("لم يتم العثور على app-container!");
+    return;
+  }
 
+  const ui = new UIManager();
   const scene = createScene(renderer);
   const camera = createCamera();
   const controls = createControls(camera, renderer);
@@ -38,6 +47,20 @@ export function bootstrap()
   scene.add(createHoopMesh());
   scene.add(createNetMesh());
   scene.add(createLightPolesMesh());
+
+ const audio = new AudioManager();
+
+ function unlockAudio() {
+  audio.playBackground("/sounds/shoot.mp3", { volume: 0.3, fadeIn: 2 });
+  window.removeEventListener("keydown", unlockAudio);
+  window.removeEventListener("pointerdown", unlockAudio);
+}
+window.addEventListener("keydown", unlockAudio);
+window.addEventListener("pointerdown", unlockAudio);
+
+window.addEventListener("keydown", (e) => {
+  if (e.code === "KeyM") audio.toggleMute();
+});
 
   const ballMesh = createBallMesh();
   scene.add(ballMesh);
@@ -59,16 +82,21 @@ export function bootstrap()
     walk,
     onScore() {
       console.log("=== SCORE DETECTED ===");
+      ui.recordMade(2);
+    },
+    onAttempt() {
+      ui.recordAttempt();
     },
   });
 
-  simulation.reset();
+  simulation.placeAtRest();
   simulation.attachInput();
   runPhysicsTest();
 
   exposePhysicsLab(simulation);
 
   window.simulation = simulation;
+  window.ui = ui;
 
   const clock = new THREE.Clock();
 
@@ -90,5 +118,4 @@ export function bootstrap()
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
-
 }

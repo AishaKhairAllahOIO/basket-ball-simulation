@@ -9,4 +9,36 @@
   <body>
     <script type="module" src="/src/app/main.js"></script>
   </body>
+</html><!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Basketball Physics Simulation</title>
+    <link rel="stylesheet" href="/src/ui/style.css" />
+  </head>
+
+  <body>
+    <div id="app-container"></div>
+
+    <div id="ui-container">
+        
+        <div id="score-panel" class="panel">
+            <div class="row"><span>Score:</span> <span id="ui-score">00</span></div>
+            <div class="row"><span>Attempts:</span> <span id="ui-attempts">0</span></div>
+            <div class="row"><span>Made:</span> <span id="ui-made">0</span></div>
+        </div>
+
+        <div id="controls-panel" class="panel">
+            <div class="control-item"><kbd>Arrow Keys</kbd> - Move ball</div>
+            <div class="control-item"><kbd>Space</kbd> - Shoot</div>
+            <div class="control-item"><kbd>R</kbd> - Reset ball</div>
+            <div class="control-item"><kbd>C</kbd> - Switch camera</div>
+            <div class="control-item"><kbd>ESC</kbd> - Toggle orbit controls</div>
+        </div>
+        
+    </div>
+
+    <script type="module" src="/src/app/main.js"></script>
+  </body>
 </html>
