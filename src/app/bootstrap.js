@@ -20,7 +20,6 @@ import { createSimulationBridge } from "../game/SimulationBridge.js";
 import { exposePhysicsLab } from "../game/PhysicsConsoleLab.js";
 import { runPhysicsTest } from "../game/PhysicsConsoleTest.js";
 import { UIManager } from "../ui/UIManager.js";
-import { AudioManager } from "../audio/AudioManager.js";
 
 
 export function bootstrap() {
@@ -48,7 +47,6 @@ export function bootstrap() {
   scene.add(createNetMesh());
   scene.add(createLightPolesMesh());
 
- const audio = new AudioManager();
 
 
 
