@@ -1,9 +1,11 @@
 import { Energy } from "../dynamics/Energy.js";
 
-export function EnergyAnalysis(previousEnergy, body, config) {
+export function EnergyAnalysis(previousEnergy, body, config) 
+{
   const current = Energy(body, config);
 
-  if (!previousEnergy) {
+  if (!previousEnergy) 
+  {
     return {
       current,
       previous: null,

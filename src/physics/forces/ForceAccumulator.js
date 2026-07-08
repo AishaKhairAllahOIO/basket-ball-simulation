@@ -9,13 +9,15 @@ import { NetResistance } from "./NetResistance.js";
 import { AngularDamping } from "./AngularDamping.js";
 import { RollingResistance } from "../response/RollingResistance.js";
 
-export function ForceAccumulator(body, contacts, config, dt) {
+export function ForceAccumulator(body, contacts, config, dt) 
+{
   body.addForce(Gravity(body, config));
   body.addForce(AerodynamicDrag(body, config));
   body.addForce(MagnusEffect(body, config));
   body.addForce(Buoyancy(body, config));
 
-  for (const contact of contacts) {
+  for (const contact of contacts) 
+  {
     const Fn = NormalForce(body, contact);
     body.addForce(Fn);
 
@@ -25,7 +27,8 @@ export function ForceAccumulator(body, contacts, config, dt) {
       canApplyStatic: false,
     };
 
-    if (config.enabled.staticFriction) {
+    if (config.enabled.staticFriction) 
+    {
       staticFriction = StaticFriction(
         body,
         contact,
@@ -37,7 +40,8 @@ export function ForceAccumulator(body, contacts, config, dt) {
       body.addTorque(staticFriction.tau);
     }
 
-    if (!staticFriction.canApplyStatic && config.enabled.kineticFriction) {
+    if (!staticFriction.canApplyStatic && config.enabled.kineticFriction) 
+    {
       const kineticFriction = KineticFriction(
         body,
         contact,
@@ -51,7 +55,8 @@ export function ForceAccumulator(body, contacts, config, dt) {
     if (
       contact.type === "ground" &&
       config.enabled.rollingResistance
-    ) {
+    ) 
+    {
       body.addForce(
         RollingResistance(
           body,
@@ -61,7 +66,8 @@ export function ForceAccumulator(body, contacts, config, dt) {
     }
   }
 
-  if (config.netState?.isInsideNet) {
+  if (config.netState?.isInsideNet)
+  {
     body.addForce(NetResistance(body, config));
   }
 

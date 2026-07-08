@@ -1,4 +1,5 @@
-export function NetContact(body, config) {
+export function NetContact(body, config) 
+{
   const rim = config.court.hoop;
   const net = config.court.net;
 

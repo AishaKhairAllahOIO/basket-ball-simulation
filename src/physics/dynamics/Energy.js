@@ -1,4 +1,5 @@
-export function Energy(body, config) {
+export function Energy(body, config) 
+{
   const g = config?.environment?.g ?? 9.81;
 
   const Kt = 0.5 * body.m * body.v.lengthSq();

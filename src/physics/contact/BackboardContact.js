@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
-export function BackboardContact(body, config) {
+export function BackboardContact(body, config) 
+{
   const board = config.court.backboard;
 
   const normal = new THREE.Vector3(board.normalDirection, 0, 0).normalize();

@@ -1,6 +1,7 @@
 export const PhysicsConfig = Object.freeze({
 
-  enabled: {
+  enabled: 
+  {
 
     gravity: true,
 
@@ -34,7 +35,8 @@ export const PhysicsConfig = Object.freeze({
 
   },
 
-  integrator: {
+  integrator: 
+  {
 
     type: "SemiImplicitEuler",
 
@@ -44,7 +46,8 @@ export const PhysicsConfig = Object.freeze({
 
   },
 
-  limits: {
+  limits: 
+  {
 
     maxVelocity: 35,
 

@@ -1,6 +1,7 @@
 import { Basketball } from "../physics/bodies/Basketball.js";
 import { PhysicsWorld } from "../physics/simulation/PhysicsWorld.js";
 import { SimulationDiagnostics } from "../physics/diagnostics/SimulationDiagnostics.js";
+import { ConsoleShotDiagnostics } from "../physics/diagnostics/ShotDiagnostics.js";
 
 let currentOverrides = {};
 
@@ -54,11 +55,13 @@ function run({ overrides = {}, steps = 120, dt = 1 / 120 } = {}) {
   }
 
   console.table(rows);
+  const shotReport = ConsoleShotDiagnostics(ball, world);
 
   return {
     ball,
     world,
     rows,
+    shotReport,
     diagnostics: SimulationDiagnostics(ball, world.config, world),
     overrides: currentOverrides,
   };

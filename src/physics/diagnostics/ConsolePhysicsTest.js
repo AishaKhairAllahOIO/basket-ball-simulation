@@ -1,6 +1,7 @@
 import { SimulationDiagnostics } from "./SimulationDiagnostics.js";
 
-export function ConsolePhysicsTest(body) {
+export function ConsolePhysicsTest(body) 
+{
   const report = SimulationDiagnostics(body);
 
   console.clear();

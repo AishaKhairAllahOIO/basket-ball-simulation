@@ -2,7 +2,8 @@ import { BasketballProperties } from "../properties/BasketballProperties.js";
 import { BasketballGeometry } from "./BasketballGeometry.js";
 
 export const BasketballInertia = Object.freeze({
-  get I() {
+  get I() 
+  {
     return (
       BasketballProperties.lambda *
       BasketballProperties.m *

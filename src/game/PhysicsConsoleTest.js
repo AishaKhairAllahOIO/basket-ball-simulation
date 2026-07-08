@@ -7,7 +7,8 @@ export function runPhysicsTest() {
 
   console.log("=== START PHYSICS TEST ===");
 
-  for (let i = 0; i < 120; i++) {
+  for (let i = 0; i < 120; i++) 
+  {
     const dt = 1 / 120;
 
     const result = world.step(dt);
@@ -18,7 +19,8 @@ export function runPhysicsTest() {
       `vel=(${ball.v.x.toFixed(2)}, ${ball.v.y.toFixed(2)}, ${ball.v.z.toFixed(2)})`
     );
 
-    if (result?.hasScored) {
+    if (result?.hasScored) 
+    {
       console.log("=== SCORE DETECTED ===");
       break;
     }

@@ -17,18 +17,21 @@ import { ContinuousCollisionDetection } from "../contact/ContinuousCollisionDete
 import { Energy } from "../dynamics/Energy.js";
 import { EnergyAnalysis } from "../diagnostics/EnergyAnalysis.js";
 
-export class PhysicsWorld {
-  constructor(body, configOverrides = {}) {
+export class PhysicsWorld 
+{
+  constructor(body, configOverrides = {}) 
+  {
     this.body = body;
     this.config = createPhysicsConfig(configOverrides);
 
     this.accumulator = 0;
     this.integrator = IntegratorFactory(this.config.integrator.type);
     this.previousEnergy = Energy(this.body, this.config);
-this.lastEnergyAnalysis = null;
+    this.lastEnergyAnalysis = null;
   }
 
-  step(frameDt) {
+  step(frameDt) 
+  {
     const dt = this.config.integrator.fixedTimestep;
     const maxSubSteps = this.config.integrator.maxSubSteps;
 
@@ -37,23 +40,26 @@ this.lastEnergyAnalysis = null;
     let result = null;
     let steps = 0;
 
-    while (this.accumulator >= dt && steps < maxSubSteps) {
+    while (this.accumulator >= dt && steps < maxSubSteps)
+    {
       this.body.clearForces();
 
       const contacts = ContactManager(this.body, this.config);
+      this.lastContacts = contacts;
 
       const netState = this.computeNetState();
 
      
-      ForceAccumulator(
-  this.body,
-  contacts,
-  {
-    ...this.config,
-    netState,
-  },
-  dt
-);
+      ForceAccumulator
+      (
+        this.body,
+        contacts,
+        {
+          ...this.config,
+          netState,
+        },
+        dt
+      );
       applyLinearMotion(this.body);
       applyAngularMotion(this.body);
 
@@ -63,21 +69,23 @@ this.lastEnergyAnalysis = null;
 
       const ccdContacts = ContinuousCollisionDetection(this.body, this.config);
 
-if (ccdContacts.length > 0) {
-  ImpulseSolver(this.body, ccdContacts, this.config);
-  PenetrationCorrection(this.body, ccdContacts, this.config);
-}
+      if (ccdContacts.length > 0) 
+      {
+        ImpulseSolver(this.body, ccdContacts, this.config);
+        PenetrationCorrection(this.body, ccdContacts, this.config);
+      }
 
       PenetrationCorrection(this.body, contacts, this.config);
 
       result = ScoreDetector(this.body, this.config);
-      this.lastEnergyAnalysis = EnergyAnalysis(
-  this.previousEnergy,
-  this.body,
-  this.config
-);
+      this.lastEnergyAnalysis = EnergyAnalysis
+      (
+        this.previousEnergy,
+        this.body,
+        this.config
+      );
 
-this.previousEnergy = this.lastEnergyAnalysis.current;
+      this.previousEnergy = this.lastEnergyAnalysis.current;
 
       this.accumulator -= dt;
       steps += 1;
@@ -86,7 +94,8 @@ this.previousEnergy = this.lastEnergyAnalysis.current;
     return result;
   }
 
-  computeNetState() {
+  computeNetState() 
+  {
     const rim = this.config.court.hoop;
     const net = this.config.court.net;
 
