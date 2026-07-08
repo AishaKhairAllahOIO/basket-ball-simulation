@@ -50,17 +50,7 @@ export function bootstrap() {
 
  const audio = new AudioManager();
 
- function unlockAudio() {
-  audio.playBackground("/sounds/shoot.mp3", { volume: 0.3, fadeIn: 2 });
-  window.removeEventListener("keydown", unlockAudio);
-  window.removeEventListener("pointerdown", unlockAudio);
-}
-window.addEventListener("keydown", unlockAudio);
-window.addEventListener("pointerdown", unlockAudio);
 
-window.addEventListener("keydown", (e) => {
-  if (e.code === "KeyM") audio.toggleMute();
-});
 
   const ballMesh = createBallMesh();
   scene.add(ballMesh);
