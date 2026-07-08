@@ -2,7 +2,21 @@ import * as THREE from "three";
 
 const EPSILON = 1e-8;
 
-export function RimContact(body, config) {
+function classifyRimHit(dx, dz) 
+{
+  const absX = Math.abs(dx);
+  const absZ = Math.abs(dz);
+
+  if (absX >= absZ) 
+  {
+    return dx < 0 ? "front-rim" : "back-rim";
+  }
+
+  return dz < 0 ? "right-rim" : "left-rim";
+}
+
+export function RimContact(body, config) 
+{
   const rim = config.court.hoop;
 
   const center = new THREE.Vector3(rim.x, rim.y, rim.z);
@@ -11,6 +25,7 @@ export function RimContact(body, config) {
 
   const dx = body.position.x - center.x;
   const dz = body.position.z - center.z;
+  const rimHitType = classifyRimHit(dx, dz);
   const horizontalDistance = Math.sqrt(dx * dx + dz * dz);
 
   if (horizontalDistance < EPSILON) return null;
@@ -31,6 +46,7 @@ export function RimContact(body, config) {
 
   return {
     type: "rim",
+    rimHitType,
     normal,
     penetrationDepth: collisionDistance - distance,
     contactPoint: closestPointOnRimCenterline

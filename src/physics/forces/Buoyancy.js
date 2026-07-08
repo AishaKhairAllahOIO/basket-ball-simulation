@@ -1,7 +1,9 @@
 import * as THREE from "three";
 
-export function Buoyancy(body, config) {
-  if (!config.enabled.buoyancy) {
+export function Buoyancy(body, config) 
+{
+  if (!config.enabled.buoyancy) 
+  {
     return new THREE.Vector3();
   }
 

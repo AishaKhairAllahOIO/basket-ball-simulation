@@ -1,4 +1,5 @@
-export function ElasticResponse(contact, body) {
+export function ElasticResponse(contact, body) 
+{
   const n = contact.normal.clone().normalize();
   const vn = body.v.dot(n);
 

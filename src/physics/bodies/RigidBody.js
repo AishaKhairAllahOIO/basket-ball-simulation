@@ -1,7 +1,9 @@
 import * as THREE from "three";
 
-export class RigidBody {
-  constructor({ m, R, I, position, velocity, omega }) {
+export class RigidBody 
+{
+  constructor({ m, R, I, position, velocity, omega }) 
+  {
     this.m = m;
     this.R = R;
     this.I = I;
@@ -19,16 +21,19 @@ export class RigidBody {
     this.tau = new THREE.Vector3();
   }
 
-  clearForces() {
+  clearForces() 
+  {
     this.F.set(0, 0, 0);
     this.tau.set(0, 0, 0);
   }
 
-  addForce(F) {
+  addForce(F) 
+  {
     this.F.add(F);
   }
 
-  addTorque(tau) {
+  addTorque(tau) 
+  {
     this.tau.add(tau);
   }
 }

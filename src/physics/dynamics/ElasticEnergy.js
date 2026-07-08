@@ -1,5 +1,7 @@
-export function ElasticEnergy(contact) {
-  if (!contact || contact.penetrationDepth <= 0) {
+export function ElasticEnergy(contact) 
+{
+  if (!contact || contact.penetrationDepth <= 0) 
+  {
     return {
       stored: 0,
       dissipatedPower: 0,

@@ -1,12 +1,15 @@
 import { shouldBounce, applyRestitution } from "./Restitution.js";
 
-export function ImpulseSolver(body, contacts) {
-  for (const contact of contacts) {
+export function ImpulseSolver(body, contacts) 
+{
+  for (const contact of contacts) 
+  {
     const normal = contact.normal.clone().normalize();
 
     const vn = body.v.dot(normal);
 
-    if (!shouldBounce(vn)) {
+    if (!shouldBounce(vn)) 
+    {
       continue;
     }
 
@@ -18,8 +21,6 @@ export function ImpulseSolver(body, contacts) {
 
     const impulse = normal.clone().multiplyScalar(impulseMagnitude);
 
-    body.v.add(
-      impulse.clone().divideScalar(body.m)
-    );
+    body.v.add(impulse.clone().divideScalar(body.m));
   }
 }

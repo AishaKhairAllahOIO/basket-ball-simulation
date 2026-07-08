@@ -1,6 +1,7 @@
 import { Energy } from "../dynamics/Energy.js";
 
-export function EnergyDiagnostics(body, config) {
+export function EnergyDiagnostics(body, config) 
+{
   const energy = Energy(body, config);
 
   return {

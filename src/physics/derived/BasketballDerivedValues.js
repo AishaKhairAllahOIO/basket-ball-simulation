@@ -5,7 +5,8 @@ export const BasketballDerivedValues = Object.freeze({
   geometry: BasketballGeometry,
   inertia: BasketballInertia,
 
-  snapshot() {
+  snapshot() 
+  {
     return {
       R: Number(BasketballGeometry.R.toFixed(4)),
       D: Number(BasketballGeometry.D.toFixed(4)),

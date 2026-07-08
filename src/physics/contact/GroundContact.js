@@ -1,6 +1,7 @@
 import * as THREE from "three";
 
-export function GroundContact(body, config) {
+export function GroundContact(body, config) 
+{
   const ground = config.court.ground;
   const bottomY = body.position.y - body.R;
 
